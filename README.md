@@ -9,7 +9,7 @@
 - **不覆盖**：模型训练、微调、底层算法、Python LangChain（生态不同）。
 - **形式**：约 60 章正文 + 4 个综合项目，每章有可运行的代码示例。
 
-完整目录见 [SUMMARY.md](./SUMMARY.md)，建议从 [前言](./00-introduction/preface.md) 开始。
+完整目录见 [SUMMARY.md](./SUMMARY.md)，建议从 [前言](./00-introduction/00-preface.md) 开始。
 
 ## 在线阅读
 
