@@ -1,7 +1,7 @@
 ---
 title: 术语表
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/SMuDwViHoiSrSWkyJ1xcDo21nrc"
+last_synced: "2026-05-25T02:43:54+08:00"
 ---
 
 > 全书出现的核心术语中英对照。每条术语标注首次出现的章节，方便回查上下文。

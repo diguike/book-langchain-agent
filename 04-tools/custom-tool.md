@@ -1,7 +1,7 @@
 ---
 title: 自定义 Tool 开发
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/DVYHwbGswi7O2Ek6jGQcZ90nn6M"
+last_synced: "2026-05-25T02:41:44+08:00"
 ---
 
 > 模块 04 - 工具与函数调用 | 前置：[Tool 接口与定义](./tool-interface.md) | 后续：[Function Calling 跨模型统一](./function-calling.md)

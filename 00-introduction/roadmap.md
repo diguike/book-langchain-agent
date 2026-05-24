@@ -1,7 +1,7 @@
 ---
 title: 课程路线图
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/Xbn5wMlqZix4WTkhwYoc6LcdnbW"
+last_synced: "2026-05-25T02:40:32+08:00"
 ---
 
 ## 课程目标与受众定位

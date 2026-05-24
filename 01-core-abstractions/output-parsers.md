@@ -1,7 +1,7 @@
 ---
 title: Output Parsers
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/Qcftw6VEJikFgOkY8TBcoxPHnUd"
+last_synced: "2026-05-25T02:40:56+08:00"
 ---
 
 > 模块 01 - 核心抽象 | 前置：[Prompt Templates](./prompt-templates.md)

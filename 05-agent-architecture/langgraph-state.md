@@ -1,7 +1,7 @@
 ---
 title: LangGraph State 与 Checkpointer
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/TvanwpK8kipAvmkDUjBcehEynNd"
+last_synced: "2026-05-25T02:42:17+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[LangGraph 入门](./langgraph-intro.md)

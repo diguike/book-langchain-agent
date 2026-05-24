@@ -1,7 +1,7 @@
 ---
 title: Function Calling 跨模型统一
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/BotiwSNT2iSLPxkzIPSc6t1Sn3d"
+last_synced: "2026-05-25T02:41:48+08:00"
 ---
 
 > 模块 04 - 工具与函数调用 | 前置：[Tool 接口与定义](./tool-interface.md)、[自定义 Tool 开发](./custom-tool.md) | 后续：[MCP Server 集成](./mcp-server.md)

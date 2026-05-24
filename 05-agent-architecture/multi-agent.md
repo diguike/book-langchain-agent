@@ -1,7 +1,7 @@
 ---
 title: Multi-Agent 协作
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/AL4AwD7ryi2dduk3A8EcNX57nCh"
+last_synced: "2026-05-25T02:42:24+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./create-agent.md)、[LangGraph 入门](./langgraph-intro.md)

@@ -1,7 +1,7 @@
 ---
 title: RAG 基础管线
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/VtUFwGNyiiGI0Okyczzc9rm6ndd"
+last_synced: "2026-05-25T02:42:31+08:00"
 ---
 
 > 模块 06 - RAG | 前置知识：[Tool 接口](../04-tools/tool-interface.md)、[createAgent 入门](../05-agent-architecture/create-agent.md)

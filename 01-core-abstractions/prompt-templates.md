@@ -1,7 +1,7 @@
 ---
 title: Prompt Templates
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/DWeHwaWuqiiT6tktSW1c6JAtnpf"
+last_synced: "2026-05-25T02:40:53+08:00"
 ---
 
 > 模块 01 - 核心抽象 | 前置：[Model I/O](./model-io.md)

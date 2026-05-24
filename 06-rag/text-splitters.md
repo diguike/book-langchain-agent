@@ -1,7 +1,7 @@
 ---
 title: Text Splitters
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/PGcDwgnA4iUDgFkopW2cOcKjnhb"
+last_synced: "2026-05-25T02:42:38+08:00"
 ---
 
 > 模块 06 - RAG | 前置知识：[Document Loaders](./document-loaders.md)

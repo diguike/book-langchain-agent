@@ -1,7 +1,7 @@
 ---
 title: VectorStore 记忆作为工具
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/VD1mwuYDMipFW0krybUctthUnee"
+last_synced: "2026-05-25T02:41:29+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 第 4 节 | 前置：[Summary 策略 - 用 middleware 压缩历史](./summary-memory.md)

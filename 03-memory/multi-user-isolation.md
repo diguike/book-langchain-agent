@@ -1,7 +1,7 @@
 ---
 title: 多用户记忆隔离
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/MtmxwtDP0iXR7tkBVi2cZ09SnYb"
+last_synced: "2026-05-25T02:41:37+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 第 6 节 | 前置：[自定义后端 - 实现自己的 checkpointer 与 store](./custom-message-history.md)

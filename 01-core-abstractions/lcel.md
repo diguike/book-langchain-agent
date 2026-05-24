@@ -1,7 +1,7 @@
 ---
 title: LCEL 表达式语言
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/Sqn2w3DqciDUBSk4C3KcLc1PnUb"
+last_synced: "2026-05-25T02:40:46+08:00"
 ---
 
 > 模块 01 - 核心抽象 | 前置：[Runnable 接口详解](./runnable-interface.md)

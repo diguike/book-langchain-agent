@@ -1,7 +1,7 @@
 ---
 title: LangGraph 入门
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/XUhfwxbEGiYSnlkCl9ecj92KnDe"
+last_synced: "2026-05-25T02:42:13+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./create-agent.md)

@@ -1,7 +1,7 @@
 ---
 title: API 服务化
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/BxKkwvzQ8i5gsnkmvaucWBalnth"
+last_synced: "2026-05-25T02:43:07+08:00"
 ---
 
 > 模块 08 - 生产部署 | 前置知识：[createAgent 入门](../05-agent-architecture/create-agent.md)、[流式输出深入](../05-agent-architecture/stream-modes.md)

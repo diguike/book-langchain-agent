@@ -1,7 +1,7 @@
 ---
 title: 前置知识清单
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/G7rIwXaLSisYO6kmJNmcP4bgnmg"
+last_synced: "2026-05-25T02:40:35+08:00"
 ---
 
 本页列出学习本课程所需的前置知识。你不需要精通每一项，但至少需要 **"能看懂、会用"** 的程度。每项知识都标注了重要程度和推荐学习资源，方便你按需补课。

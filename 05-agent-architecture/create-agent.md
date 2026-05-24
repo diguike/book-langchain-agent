@@ -1,7 +1,7 @@
 ---
 title: createAgent 入门
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://www.feishu.cn/wiki/W2b4w659AiOMVDku4CAclsqInfc"
+last_synced: "2026-05-25T02:40:11+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[Tool 接口与定义](../04-tools/tool-interface.md)、[Function Calling](../04-tools/function-calling.md)

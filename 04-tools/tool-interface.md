@@ -1,7 +1,7 @@
 ---
 title: Tool 接口与定义
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/WEXOwLSW8iGMY1krTUtcgzV3njg"
+last_synced: "2026-05-25T02:41:41+08:00"
 ---
 
 > 模块 04 - 工具与函数调用 | 前置知识：[03-记忆系统](../03-memory/memory-overview.md) | 后续：[自定义 Tool 开发](./custom-tool.md)、[Function Calling 跨模型统一](./function-calling.md)

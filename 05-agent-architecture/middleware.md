@@ -1,7 +1,7 @@
 ---
 title: Middleware 系统
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://www.feishu.cn/wiki/JfoywJRA2i4ZXok3wloc4qRunuc"
+last_synced: "2026-05-25T02:40:15+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./create-agent.md)

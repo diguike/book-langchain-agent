@@ -1,7 +1,7 @@
 ---
 title: 部署架构
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/UNflwgQe9iHm77kPEgEcQIgqnSe"
+last_synced: "2026-05-25T02:43:21+08:00"
 ---
 
 > 模块 08 - 生产部署 | 前置知识：[API 服务化](./api-server.md)、[流式接口部署](./streaming-api.md)

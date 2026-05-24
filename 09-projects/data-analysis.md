@@ -1,7 +1,7 @@
 ---
 title: 数据分析 Agent
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/VftxwN4cbiXtSMktNdzch3PIn8f"
+last_synced: "2026-05-25T02:43:33+08:00"
 ---
 
 > 模块 09 - 综合项目 | 前置：[Tool 接口与定义](../04-tools/tool-interface.md)、[Output Parsers](../01-core-abstractions/output-parsers.md)

@@ -1,7 +1,7 @@
 ---
 title: 自定义后端 - 实现自己的 checkpointer 与 store
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/NHibwtQMhiEwJskLxzOc0ZO5n7c"
+last_synced: "2026-05-25T02:41:33+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 第 5 节 | 前置：[VectorStore 记忆作为工具](./vectorstore-memory.md)

@@ -1,7 +1,7 @@
 ---
 title: RunnableSequence
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/EzXZwevp7iQKVnkx6JDceP4Xn5b"
+last_synced: "2026-05-25T02:41:00+08:00"
 ---
 
 > 模块 02 - Chain 组合 | 前置知识：[01-核心抽象](../01-core-abstractions/) 中的 Runnable 接口与 LCEL

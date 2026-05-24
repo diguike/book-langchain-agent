@@ -1,7 +1,7 @@
 ---
 title: 多 Agent 工作流平台
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/Fzl1wdrH9izsFvkfkTIcRkoMnlc"
+last_synced: "2026-05-25T02:43:37+08:00"
 ---
 
 > 模块 09 - 综合项目 | 前置：[Multi-Agent 协作](../05-agent-architecture/multi-agent.md)、[State、Channels 与 Checkpointer](../05-agent-architecture/langgraph-state.md)

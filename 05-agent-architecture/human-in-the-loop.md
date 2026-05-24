@@ -1,7 +1,7 @@
 ---
 title: Human-in-the-Loop 与 typed interrupt
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/H5QRwukvWiKJ3Yk9sRLcXPCrnph"
+last_synced: "2026-05-25T02:42:27+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./create-agent.md)、[LangGraph State 与 Checkpointer](./langgraph-state.md)

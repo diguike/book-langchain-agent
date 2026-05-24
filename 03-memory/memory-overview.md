@@ -1,7 +1,7 @@
 ---
 title: 1.x 时代的记忆系统
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/GMTkwuLuxiQfp7kh8fTcVmn9nqe"
+last_synced: "2026-05-25T02:41:19+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 前置知识：[createAgent 入门](../05-agent-architecture/create-agent.md)（如果你跳着读，先回去看一眼）

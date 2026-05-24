@@ -1,7 +1,7 @@
 ---
 title: 缓存与成本优化
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/SgEXwWbD8iuGqikHtV0cIJ3nnbg"
+last_synced: "2026-05-25T02:43:14+08:00"
 ---
 
 > 模块 08 - 生产部署 | 前置知识：[Callback 系统](../07-observability/callbacks.md)、[API 服务化](./api-server.md)

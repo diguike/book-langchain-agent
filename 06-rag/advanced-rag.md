@@ -1,7 +1,7 @@
 ---
 title: 高级 RAG 技术
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/F2RewRsLciElKAkJL9ncVqyUnwb"
+last_synced: "2026-05-25T02:42:45+08:00"
 ---
 
 > 模块 06 - RAG | 前置知识：[Retriever 策略](./retrievers.md)

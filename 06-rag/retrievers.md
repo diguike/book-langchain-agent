@@ -1,7 +1,7 @@
 ---
 title: Retriever 策略
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/QSjYwPf8fiI14ykxBV7c9LzZnqd"
+last_synced: "2026-05-25T02:42:42+08:00"
 ---
 
 > 模块 06 - RAG | 前置知识：[Text Splitters](./text-splitters.md)

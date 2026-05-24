@@ -1,7 +1,7 @@
 ---
 title: LangSmith Tracing
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/ND7kwVIiUiffeik3HWec7XRGnzG"
+last_synced: "2026-05-25T02:42:56+08:00"
 ---
 
 > 模块 07 - 可观测性与评估 | 前置知识：[Callback 系统](./callbacks.md)、[createAgent 入门](../05-agent-architecture/create-agent.md)

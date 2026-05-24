@@ -1,7 +1,7 @@
 ---
 title: 推荐资源与社区
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/FORzws9OdiNV83kbZwbciTI1nrh"
+last_synced: "2026-05-25T02:43:49+08:00"
 ---
 
 > 这一章给的是我自己在写这本书的过程中实际反复查、反复看的资源。不堆"清单"，每个都标一下"什么时候该来这里"。

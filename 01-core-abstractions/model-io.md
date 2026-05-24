@@ -1,7 +1,7 @@
 ---
 title: Model I/O
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/B9ebwdiwli9OImkTYlmcSTnznxP"
+last_synced: "2026-05-25T02:40:49+08:00"
 ---
 
 > 模块 01 - 核心抽象 | 前置：[LCEL 表达式语言](./lcel.md)

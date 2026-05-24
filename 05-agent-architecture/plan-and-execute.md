@@ -1,7 +1,7 @@
 ---
 title: Plan and Execute
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/CpwBwm4ZAiBIpskVJ9XcyHRRn3b"
+last_synced: "2026-05-25T02:42:03+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[ReAct 模式](./react-pattern.md)、[LangGraph 入门](./langgraph-intro.md)

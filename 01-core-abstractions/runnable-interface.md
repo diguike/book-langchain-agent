@@ -1,7 +1,7 @@
 ---
 title: Runnable 接口详解
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/YQC1wXxfhio2qIkHfnKcRwtNnLz"
+last_synced: "2026-05-25T02:40:42+08:00"
 ---
 
 > 模块 01 - 核心抽象 | 前置：[导论](../00-introduction/roadmap.md)

@@ -1,7 +1,7 @@
 ---
 title: 短期记忆 - thread-based checkpointer
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/LMadwwB1Biq2NpkEm2Qc5XpGnFc"
+last_synced: "2026-05-25T02:41:22+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 第 2 节 | 前置：[1.x 时代的记忆系统](./memory-overview.md)

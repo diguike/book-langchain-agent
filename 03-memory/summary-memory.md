@@ -1,7 +1,7 @@
 ---
 title: Summary 策略 - 用 middleware 压缩历史
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/V5Dzw4BabiS6L8k1sQOctLqOngc"
+last_synced: "2026-05-25T02:41:26+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 第 3 节 | 前置：[短期记忆 - thread-based checkpointer](./buffer-memory.md)

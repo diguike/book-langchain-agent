@@ -1,7 +1,7 @@
 ---
 title: 前言
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://www.feishu.cn/wiki/FI4uwojq3i004XkhQc4c2rUOneg"
+last_synced: "2026-05-25T02:40:01+08:00"
 ---
 
 ## 为什么写这本书
