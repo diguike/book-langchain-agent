@@ -1,7 +1,7 @@
 ---
 title: 环境搭建指南
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/X7p7w4jFNibXH2kJzsXc8EbanYi"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 本指南将带你从零搭建 LangChain.js 开发环境。全程预计 **30-60 分钟**，完成后你将拥有一个可运行的 TypeScript + LangChain.js 项目。

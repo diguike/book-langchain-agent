@@ -1,7 +1,7 @@
 ---
 title: 流式输出深入 Stream Modes 与 Events
 feishu_url: "https://www.feishu.cn/wiki/BP71wWUVEi2RlLkk69BcjMMRn1e"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./01-create-agent.md)、[LangGraph 入门](./03-langgraph-intro.md)

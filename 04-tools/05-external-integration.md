@@ -1,7 +1,7 @@
 ---
 title: 外部系统集成模式
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/NTdQwF8Xjid1R3kmDUacXmm0n2g"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 04 - 工具与函数调用 | 前置：[Tool 接口与定义](./01-tool-interface.md)、[自定义 Tool 开发](./02-custom-tool.md)、[Function Calling 跨模型统一](./03-function-calling.md)、[MCP Server 集成](./04-mcp-server.md) | 后续：[05-Agent 架构](../05-agent-architecture/01-create-agent.md)

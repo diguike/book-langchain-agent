@@ -1,7 +1,7 @@
 ---
 title: LCEL vs LangGraph 决策指南
 feishu_url: "https://www.feishu.cn/wiki/DYAAwabpDizTogkPSZdcm8dXn5f"
-last_synced: "2026-05-25T02:40:07+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 02 - Chain 组合 | 前置知识：[RunnableSequence](./01-runnable-sequence.md)、[Streaming 流式输出](./04-streaming.md)

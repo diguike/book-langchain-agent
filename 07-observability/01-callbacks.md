@@ -1,7 +1,7 @@
 ---
 title: Callback 系统
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/BdV6woR5ZiDMiTkWfyqcOA5Mn0d"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 07 - 可观测性与评估 | 前置知识：[createAgent 入门](../05-agent-architecture/01-create-agent.md)、[流式输出深入](../05-agent-architecture/10-stream-modes.md)

@@ -1,7 +1,7 @@
 ---
 title: 长期记忆 - Store 语义召回
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/E583wsD8uijZSBko1uvcOQfunIh"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 03 - 记忆系统 | 前置知识：[1.x 时代的记忆系统](./01-memory-overview.md)、[VectorStore 记忆作为工具](./04-vectorstore-memory.md)、[多用户记忆隔离](./06-multi-user-isolation.md)

@@ -1,7 +1,7 @@
 ---
 title: 智能客服 Agent
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/PyCXwRReAiatEDkzU51cDHmonff"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 09 - 综合项目 | 前置：[Multi-Agent 协作](../05-agent-architecture/08-multi-agent.md)、[Human-in-the-Loop](../05-agent-architecture/09-human-in-the-loop.md)

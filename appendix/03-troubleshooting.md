@@ -1,7 +1,7 @@
 ---
 title: 常见错误与排查
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/YMdZwb8QRixmVwkcYEBcEY7Jnkc"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 这一章只收 LangChain.js 1.x 时代踩过的坑。环境是 Node.js 22+，`langchain@1.5.x`、`@langchain/core@1.5.x`、`@langchain/langgraph@1.x`。

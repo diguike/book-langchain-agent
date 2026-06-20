@@ -1,7 +1,7 @@
 ---
 title: Plan and Execute 规划-执行模式
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/CpwBwm4ZAiBIpskVJ9XcyHRRn3b"
-last_synced: "2026-06-20T20:35:22+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[ReAct 模式](./02-react-pattern.md)、[LangGraph 入门](./03-langgraph-intro.md)

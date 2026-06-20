@@ -1,7 +1,7 @@
 ---
 title: 深度调研 Agent
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/SyH0wstrXijuIfkqLYbcgBeRnoe"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 09 - 综合项目 | 前置知识：[Deep Agents 深度智能体](../05-agent-architecture/11-deep-agents.md)、[RAG Agent](../06-rag/06-rag-agent.md)、[Multi-Agent 协作](../05-agent-architecture/08-multi-agent.md)

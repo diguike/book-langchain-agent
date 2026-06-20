@@ -1,7 +1,7 @@
 ---
 title: Supervisor 模式（官方 prebuilt）
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/QmmTwgYg8iTRgDkyeeNc1zplnGe"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[Multi-Agent 协作](./08-multi-agent.md)

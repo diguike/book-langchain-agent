@@ -1,7 +1,7 @@
 ---
 title: MCP Server 集成
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/HT90wgKzKiIVWmkE9tjcSWWAnPh"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 04 - 工具与函数调用 | 前置：[Function Calling 跨模型统一](./03-function-calling.md) | 后续：[外部系统集成模式](./05-external-integration.md)

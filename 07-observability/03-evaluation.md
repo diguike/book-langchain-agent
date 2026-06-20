@@ -1,7 +1,7 @@
 ---
 title: 评估方法与指标
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/NiXOwJNjmiSsiQkiM08cd6L8nrh"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 07 - 可观测性与评估 | 前置知识：[LangSmith Tracing](./02-langsmith-tracing.md)

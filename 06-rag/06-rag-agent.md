@@ -1,7 +1,7 @@
 ---
 title: RAG Agent
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/A3fowIN4Bi9n62kTTh7cSEfSndb"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 06 - RAG | 前置知识：[高级 RAG 技术](./05-advanced-rag.md)、[createAgent 入门](../05-agent-architecture/01-create-agent.md)

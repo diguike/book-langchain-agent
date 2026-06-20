@@ -1,7 +1,7 @@
 ---
 title: Output Parsers 输出解析器
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/Qcftw6VEJikFgOkY8TBcoxPHnUd"
-last_synced: "2026-06-20T20:35:22+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 01 - 核心抽象 | 前置：[Prompt Templates](./04-prompt-templates.md)

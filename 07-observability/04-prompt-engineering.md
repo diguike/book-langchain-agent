@@ -1,7 +1,7 @@
 ---
 title: Prompt 工程优化
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/DvGZwCmtsiu2xlkgGV8cemmfnDc"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 07 - 可观测性与评估 | 前置知识：[评估方法与指标](./03-evaluation.md)、[LangSmith Tracing](./02-langsmith-tracing.md)

@@ -1,7 +1,7 @@
 ---
 title: ReAct 模式
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/PMyYwpIUqiXmtRkC9xMcHEYAnge"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./01-create-agent.md)

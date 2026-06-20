@@ -1,7 +1,7 @@
 ---
 title: 代码助手 Agent
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/KZetwOhFeikuqPk6GYQcWNWsnVh"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 09 - 综合项目 | 前置：[createAgent 入门](../05-agent-architecture/01-create-agent.md)、[Streaming API](../08-production/02-streaming-api.md)

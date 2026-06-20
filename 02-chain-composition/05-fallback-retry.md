@@ -1,7 +1,7 @@
 ---
 title: Fallback 与重试
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/GmujwuEgIiO3CHkjSarcKcbtnzc"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T21:45:33+08:00"
 ---
 
 > 模块 02 - Chain 组合 | 前置知识：[RunnableSequence](./01-runnable-sequence.md)、[Streaming 流式输出](./04-streaming.md)
