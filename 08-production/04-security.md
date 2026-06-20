@@ -1,7 +1,7 @@
 ---
 title: 安全防御
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/P71yw8zT7inS8gkA5txc49x6n5c"
-last_synced: "2026-05-25T02:43:17+08:00"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > 模块 08 - 生产部署 | 前置知识：[Tool 接口与定义](../04-tools/01-tool-interface.md)、[API 服务化](./01-api-server.md)

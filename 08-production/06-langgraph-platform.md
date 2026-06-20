@@ -1,7 +1,7 @@
 ---
 title: LangGraph Platform 部署
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/UFEAwEZs7ibU3RkFKqtcDKxfnee"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > 模块 08 - 生产部署 | 前置知识：[API 服务化](./01-api-server.md)、[流式接口部署](./02-streaming-api.md)、[State 与 Checkpointer](../05-agent-architecture/04-langgraph-state.md)

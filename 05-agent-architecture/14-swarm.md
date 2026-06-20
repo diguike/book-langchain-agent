@@ -1,7 +1,7 @@
 ---
 title: Swarm 模式（官方 prebuilt）
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/E2N2wK4C1i27HzkTqaLcy7r0ndh"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[Supervisor 模式](./13-supervisor.md)、[State 与 Checkpointer](./04-langgraph-state.md)

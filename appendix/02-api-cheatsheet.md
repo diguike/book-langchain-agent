@@ -1,7 +1,7 @@
 ---
 title: API 速查表
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/TcI0waerqi2rwTkvWqvcZnOsn5f"
-last_synced: "2026-05-25T02:43:42+08:00"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > LangChain.js 1.x（写作时主版本 `langchain@1.5.x` / `@langchain/core@1.5.x`）。本表只列 1.x 仍然推荐的 API，已废弃的（`.bind()`、`.map()`、`RemoteRunnable`、`AgentExecutor` 等）一律不写。

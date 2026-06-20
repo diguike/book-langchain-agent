@@ -1,7 +1,7 @@
 ---
 title: 生成式 UI 与 useStream
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/ClOSwtJ8iilGbkk44AucqxAenei"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > 模块 10 - 前端集成 | 前置知识：[LangGraph Platform 部署](../08-production/06-langgraph-platform.md)、[流式输出深入 Stream Modes](../05-agent-architecture/10-stream-modes.md)

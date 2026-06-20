@@ -1,7 +1,7 @@
 ---
 title: Deep Agents 深度智能体
-feishu_url: ""
-last_synced: ""
+feishu_url: "https://fivwvysqdz.feishu.cn/wiki/Mr3iwYtdcizKNPknBSbcZeEpnge"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[createAgent 入门](./01-create-agent.md)、[Middleware 系统](./07-middleware.md)、[Multi-Agent 协作](./08-multi-agent.md)

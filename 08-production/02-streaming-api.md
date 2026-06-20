@@ -1,7 +1,7 @@
 ---
 title: 流式接口部署
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/TymQwIIZqizPpnkGXSzcO4lZnyg"
-last_synced: "2026-05-25T02:43:10+08:00"
+last_synced: "2026-06-20T20:08:16+08:00"
 ---
 
 > 模块 08 - 生产部署 | 前置知识：[流式输出深入](../05-agent-architecture/10-stream-modes.md)、[API 服务化](./01-api-server.md)
