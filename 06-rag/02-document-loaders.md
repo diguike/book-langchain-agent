@@ -17,6 +17,25 @@ Document Loader 是 RAG 管线的第一环，它做两件事：
 
 第一件事大部分 Loader 都能做。第二件事——metadata 设计——才是 Loader 章节真正要教的东西。LangChain.js 的 Loader 全集索引在 [官方文档](https://docs.langchain.com/oss/javascript/integrations/document_loaders/)，我这章只挑生产里真正用得多的讲。
 
+异构源经过对应的 Loader，最终都汇成同一种 `Document`（带 `pageContent` 和 `metadata`）流向下游切分，如图 6-1 所示。Loader 这一层的价值就是"抹平格式差异 + 挂上 metadata"。
+
+```mermaid
+graph LR
+    A[PDF] --> L1[PDFLoader / unstructured]
+    B[Markdown] --> L2[TextLoader + frontmatter]
+    C[网页] --> L3[Cheerio / Readability]
+    D[Notion / Confluence] --> L4[官方 API Loader]
+    E[内部数据库] --> L5[自定义 BaseDocumentLoader]
+    L1 --> DOC[统一 Document<br/>pageContent + metadata]
+    L2 --> DOC
+    L3 --> DOC
+    L4 --> DOC
+    L5 --> DOC
+    DOC --> SPLIT[下游 Splitter 切分]
+```
+
+图 6-1：多源文档经各自 Loader 归一成统一 Document 流向下游
+
 ## Document 对象到底长什么样
 
 所有 Loader 输出都是 `Document[]`，看清这个结构再往下读：

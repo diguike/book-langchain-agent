@@ -74,7 +74,19 @@ const result = await app.invoke({
 console.log(result.messages.at(-1)?.text);
 ```
 
-跟手写版比，少掉的东西：路由 schema、supervisor 节点函数、每个 Agent 的 wrapper、`{ ends }` 声明、`addEdge`。Supervisor 内部自动给每个专科 Agent 生成了 handoff 工具，由它自己决定调哪个。
+跟手写版比，少掉的东西：路由 schema、supervisor 节点函数、每个 Agent 的 wrapper、`{ ends }` 声明、`addEdge`。Supervisor 内部自动给每个专科 Agent 生成了 handoff 工具，由它自己决定调哪个。这套星型路由如图 5-10 所示——`createSupervisor` 把虚线框里的胶水全自动生成了，你只提供 `agents` / `llm` / `prompt`。
+
+```mermaid
+graph TB
+    User[用户] --> Sup[Supervisor llm 自动选 handoff 工具]
+    Sup -->|transfer_to_order_agent| O[order_agent]
+    Sup -->|transfer_to_refund_agent| R[refund_agent]
+    O -->|交回最后一条消息| Sup
+    R -->|交回最后一条消息| Sup
+    Sup -->|问题解决| User
+```
+
+图 5-10：`createSupervisor` 生成的星型路由。每个专科 Agent 对应一个自动生成的 `transfer_to_<name>` handoff 工具，Supervisor 调哪个就路由到哪个；专家干完把消息交回中心（默认 `outputMode: "last_message"`），由 Supervisor 决定再派一个还是回复用户。
 
 ## 三个最容易写错的点
 

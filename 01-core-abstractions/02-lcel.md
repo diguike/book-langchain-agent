@@ -39,17 +39,19 @@ const result = await chain.invoke({
 
 每一步的输出类型必须能对接下一步的输入类型，TypeScript 编译期就帮你查。
 
-数据在链里的形态变化：
+数据在链里逐段变形，如下图所示：
 
+```mermaid
+graph LR
+    A["输入对象<br/>language, text"] --> B["prompt<br/>填充模板"]
+    B --> C["消息数组<br/>System + Human"]
+    C --> D["model<br/>调用 LLM"]
+    D --> E["AIMessage"]
+    E --> F["parser<br/>提取文本"]
+    F --> G["string<br/>译文"]
 ```
-{ language: "英文", text: "今天天气真好" }
-  ↓ prompt.invoke()
-[SystemMessage("你是翻译助手..."), HumanMessage("今天天气真好")]
-  ↓ model.invoke()
-AIMessage({ contentBlocks: [{ type: "text", text: "The weather..." }] })
-  ↓ parser.invoke()
-"The weather is really nice today."
-```
+
+图 2-1：`prompt | model | parser` 管线的数据流向。每一步的输出类型恰好是下一步的输入类型，`.pipe()` 在编译期就能查出对不上的接口。
 
 ## 2. RunnableSequence：显式构造序列
 
@@ -130,6 +132,20 @@ const result = await analyzeArticle.invoke({ text: articleContent });
 //   sentiment: "positive"
 // }
 ```
+
+同一份输入被广播给三条子链并发执行，结果按 key 合并成一个对象，如下图所示：
+
+```mermaid
+graph LR
+    IN["输入<br/>text"] --> S["summarizeChain"]
+    IN --> K["keywordChain"]
+    IN --> SE["sentimentChain"]
+    S --> OUT["合并对象<br/>summary / keywords / sentiment"]
+    K --> OUT
+    SE --> OUT
+```
+
+图 2-2：`RunnableParallel` 的分叉合并。同一输入广播给每条分支，结果按 key 拼成对象。
 
 三条链并发执行（受底层 Provider 限流约束）。总耗时约等于最慢那条链的耗时，比顺序跑省一大截。
 

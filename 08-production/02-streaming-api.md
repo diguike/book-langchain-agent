@@ -63,6 +63,30 @@ data: {"status":"complete"}
 
 每条事件是 `event: <name>\ndata: <json>\n\n` 的格式，以空行分隔。LangGraph 1.x 的 `stream({ encoding: "text/event-stream" })` 直接产出符合这个格式的 `ReadableStream<Uint8Array>`，不需要手写拼接。
 
+整条流式链路从用户提交到 token 落到屏幕，以及用户中途点「停止」如何反向传播到服务端，如图 8-3 所示。
+
+```mermaid
+sequenceDiagram
+    participant C as 浏览器
+    participant S as Hono 服务端
+    participant A as Agent
+    participant P as LLM Provider
+    C->>S: POST chat stream 携带 message
+    S->>A: agent.stream 编码 text event-stream
+    A->>P: 发起流式请求
+    loop 逐 token
+        P-->>A: token chunk
+        A-->>S: SSE event messages
+        S-->>C: data 块实时下发
+    end
+    Note over C,S: 用户点停止
+    C->>S: 关闭连接触发 abort
+    S->>A: AbortController abort
+    A->>P: 中断上游请求
+```
+
+图 8-3：SSE 流式时序。token 边生成边下发；客户端断开后 abort 信号沿 server → Agent → Provider 反向传播，停止整条链路不浪费 token。
+
 ## 服务端：最小可上线的 SSE 接口
 
 [API 服务化](./01-api-server.md) 已经给过一个最简版本，这里把生产细节补全：
@@ -129,6 +153,20 @@ export default stream;
 少一个都可能出"客户端等了 10 秒后突然一次性收到全部 token"这种问题。
 
 ## Nginx 反代配置
+
+SSE 流式真正的难点不在服务端代码，而在中间这层反向代理：默认配置会把流缓冲住，让"流式"变成"攒一波再一次性返回"。生产链路上 token 要穿过的节点如图 8-4 所示，每一跳都可能成为缓冲点。
+
+```mermaid
+graph LR
+    C[浏览器 fetch ReadableStream] --> CDN[Cloudflare 边缘]
+    CDN --> NG[Nginx 反代 关闭 proxy_buffering]
+    NG --> A1[Agent 实例 1]
+    NG --> A2[Agent 实例 2]
+    A1 --> P[LLM Provider]
+    A2 --> P
+```
+
+图 8-4：SSE 生产部署拓扑。Cloudflare 与 Nginx 默认都会缓冲响应，必须分别关掉（CF 走 Worker 透传、Nginx 关 proxy_buffering），否则前端看到的是假流式。
 
 Nginx 默认会缓冲后端响应——对普通 API 是优化，对 SSE 是灾难。要显式关掉：
 

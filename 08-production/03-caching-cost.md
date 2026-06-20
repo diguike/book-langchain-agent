@@ -15,6 +15,28 @@ last_synced: "2026-05-25T02:43:14+08:00"
 3. **模型按难度路由**：90% 的查询其实 Haiku 4.5 / GPT-4o-mini 就能答好
 4. **Token 用量监控 + 异常告警**：找到吞 token 大户的 case 重点优化
 
+这四件事不是孤立的开关，而是一条从请求进来到最终调模型的处理链：先查精确缓存，未命中再查语义缓存，仍未命中才按难度路由到不同模型，最后所有调用都开 prompt cache 并计入预算监控。整条链路如图 8-5 所示。
+
+```mermaid
+flowchart TD
+    Q[用户请求] --> EC{精确缓存命中}
+    EC -->|是| R[直接返回]
+    EC -->|否| SC{语义缓存相似度达标}
+    SC -->|是| R
+    SC -->|否| RT[模型路由 按难度分流]
+    RT --> H[Haiku 简单]
+    RT --> S[Sonnet 中等]
+    RT --> O[Opus 复杂]
+    H --> M[调用模型 开 prompt cache]
+    S --> M
+    O --> M
+    M --> BG[BudgetGuard 计费监控]
+    BG --> W[写回缓存]
+    W --> R
+```
+
+图 8-5：成本优化处理链。命中越早成本越低；精确缓存几乎零成本，语义缓存只花一次 embedding，模型路由把多数请求分流到便宜模型，prompt cache 再砍掉重复前缀。
+
 这一节按这个顺序展开。先看下当前主流模型的定价数量级（2026-05），用来算账：
 
 | 模型 | 输入 ($/1M tokens) | 输出 ($/1M tokens) | 适用 |
@@ -233,6 +255,24 @@ async function shouldUseCache(originalQuery: string, newQuery: string, cachedAns
 判断成本（Haiku 4.5 几百 token）远低于完整 Agent 调用，性价比划算。
 
 ### 生产推荐：Redis Vector Search
+
+精确缓存和语义缓存在存储上是两套结构：精确缓存是 SHA256 哈希做 key 的 KV，语义缓存是向量索引做近邻检索。生产里它们叠成多级缓存，如图 8-6 所示——前一级廉价快速、命中率低，后一级稍贵但能覆盖相似问法。
+
+```mermaid
+graph TB
+    Q[查询] --> L1[L1 精确缓存 SHA256 KV]
+    L1 -->|未命中| L2[L2 语义缓存 向量索引]
+    L2 -->|相似度达标| J[Haiku 双阶段校验]
+    J -->|适用| HIT[返回缓存]
+    L2 -->|未命中或不适用| L3[L3 调用模型]
+    L3 --> S[写回 L1 与 L2]
+    subgraph Redis Stack
+        L1
+        L2
+    end
+```
+
+图 8-6：多级缓存拓扑。L1/L2 都落在 Redis Stack，L2 命中后再过一道 Haiku 双阶段校验防止错误命中，未命中才穿透到模型。
 
 线性扫描在缓存超过几千条之后性能塌方。生产用 Redis Stack 的向量索引（HNSW）：
 

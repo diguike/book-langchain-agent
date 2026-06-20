@@ -83,6 +83,30 @@ export default function Chat() {
 
 这就是一个完整的流式聊天界面。`thread.messages` 是已经把 token chunk 拼接好的消息数组——你不用自己接 SSE、不用自己拼 token。`thread.isLoading` 告诉你 run 是否进行中，`thread.stop()` 能中途打断。
 
+`useStream` 在前端和 LangGraph Server 之间到底替你做了什么，看图 10-1 就清楚。普通对话走上半段：`submit` 发起一次 run，Server 把 token 以 `messages-tuple` 流式吐回，hook 自动累积进 `thread.messages` 触发重渲染。遇到 HITL 走下半段：Server 在高风险工具前暂停并回传 interrupt，hook 把它放进 `thread.interrupt`，用户审批后 `submit(undefined, { command: { resume } })` 让 Server 从暂停点续跑。
+
+```mermaid
+sequenceDiagram
+    participant R as React 组件
+    participant H as useStream hook
+    participant S as LangGraph Server
+    R->>H: submit 发送消息
+    H->>S: 启动 run streamMode messages-tuple
+    loop token 流
+        S-->>H: SSE token chunk
+        H-->>R: 累积进 thread.messages 重渲染
+    end
+    Note over S: 命中高风险工具暂停
+    S-->>H: 回传 interrupt
+    H-->>R: thread.interrupt 有值 渲染审批框
+    R->>H: submit undefined command resume
+    H->>S: 从暂停点 resume
+    S-->>H: 续跑 token 流
+    H-->>R: 继续重渲染
+```
+
+> 图 10-1：`useStream` ↔ LangGraph Server 的数据流。上半段是普通 token 流式渲染，下半段是 HITL 中断与 resume。hook 内部固定用 `messages-tuple` 累积 token，这也是 `thread.messages` 能直接拿到拼好消息的原因。
+
 几个常用返回值：
 
 | 字段 | 作用 |

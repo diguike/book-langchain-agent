@@ -19,6 +19,27 @@ last_synced: "2026-05-25T02:43:07+08:00"
 
 Express 也行，写法略不同；本节末尾会给一个 Express 等价示例。
 
+一个请求从进来到拿到回答，要穿过鉴权、限流、验证、Agent 执行几道关卡，如图 8-1 所示。
+
+```mermaid
+sequenceDiagram
+    participant C as 客户端
+    participant M as Hono 中间件
+    participant R as 路由 chat
+    participant A as Agent 单例
+    participant P as LLM Provider
+    C->>M: 1. POST chat 携带 API Key
+    M->>M: 2. 鉴权 + 限流 + Zod 验证
+    M->>R: 3. 校验通过放行
+    R->>A: 4. agent.invoke 消息
+    A->>P: 5. 调模型 + 工具循环
+    P-->>A: 6. 返回结果
+    A-->>R: 7. 最终消息
+    R-->>C: 8. JSON 响应
+```
+
+图 8-1：同步对话接口的请求时序。鉴权、限流、验证在进入路由前就拦截非法请求，Agent 执行只处理已校验的输入。
+
 ## 项目结构
 
 ```
@@ -363,6 +384,34 @@ export default health;
 Liveness 失败 K8s 会重启 pod；Readiness 失败 K8s 会把 pod 从 Service 摘除但不重启。区分两者很重要。
 
 ## 完整入口
+
+入口文件把上面这些散件按图 8-2 的分层组装起来：健康检查直挂根路径不过鉴权，业务 API 统一套上鉴权 + 限流再分发到各路由。
+
+```mermaid
+graph TB
+    subgraph 全局中间件
+        L[logger 日志]
+        S[secureHeaders 安全头]
+        CO[cors 跨域]
+    end
+    subgraph 业务网关 api
+        AU[apiKeyAuth 鉴权]
+        RL[rateLimit 限流]
+    end
+    subgraph 路由层
+        CH[chat 同步]
+        ST[chat-stream 流式]
+        HE[health 健康检查]
+    end
+    L --> S --> CO
+    CO --> HE
+    CO --> AU --> RL
+    RL --> CH
+    RL --> ST
+    CO --> EH[onError 错误兜底]
+```
+
+图 8-2：服务分层拓扑。健康检查路由绕过业务网关，鉴权与限流只守在业务 API 前面，错误处理在最外层兜底。
 
 ```typescript
 // src/index.ts

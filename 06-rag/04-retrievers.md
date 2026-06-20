@@ -10,6 +10,23 @@ last_synced: "2026-06-20T20:08:16+08:00"
 
 模型再强，检索没召回正确 chunk，也只能编。这一节聚焦"怎么把对的 chunk 召回来"，按由浅到深的顺序：基础向量检索 → MMR 多样性 → metadata filter → 混合检索 → HNSW (Hierarchical Navigable Small World) 调优。Multi-Query、Self-Query、Rerank 这些更重的方案放到 [高级 RAG](./05-advanced-rag.md) 那一节。
 
+一条 query 进来，可以叠加多种检索手段，最终输出一组 top-k 文档，如图 6-1 所示。本节的几节内容正好对应图里这几条可选路径。
+
+```mermaid
+graph LR
+    Q[用户 query] --> F[metadata filter<br/>先剔除不该搜的]
+    F --> V[向量相似度检索]
+    F --> B[BM25 关键词检索]
+    V --> MMR[MMR 去冗余]
+    V --> RRF[RRF 融合]
+    B --> RRF
+    MMR --> TOPK[top-k 文档]
+    RRF --> TOPK
+    TOPK --> NEXT[拼 prompt 或进 Rerank]
+```
+
+图 6-1：query 经 filter 后走向量/BM25 检索，再由 MMR 或 RRF 融合产出 top-k
+
 本节会用到 langchain 1.x 的几个不同包，import 路径别混了：`EnsembleRetriever`、`ContextualCompressionRetriever` 这类经典 retriever 在 `@langchain/classic`；`BM25Retriever` 在社区包 `@langchain/community`；Qdrant、PGVector 这种规模较大的 provider 各自独立成包（`@langchain/qdrant`、`@langchain/pgvector`），不再走 `@langchain/community` 子路径。
 
 ## Retriever 接口和 VectorStoreRetriever

@@ -51,6 +51,25 @@ const result = await agent.invoke({
 
 跑一次，到 [smith.langchain.com](https://smith.langchain.com/) 的对应项目下就能看到一条 trace。整个 `createAgent` 内部的 LangGraph 循环——每次 model 节点的调用、tools 节点的工具执行——全都自动追上了，不用改任何业务代码。
 
+数据怎么从你的应用流到 LangSmith UI，如图 2-1 所示：环境变量打开追踪后，LangSmith 作为一个内置 callback handler 挂在事件流上，把每个 run 的输入输出异步批量上报到 LangSmith 后端，UI 再渲染成可点开的 trace 树。
+
+```mermaid
+sequenceDiagram
+    participant App as 你的应用
+    participant CB as LangSmith Handler
+    participant API as LangSmith 后端
+    participant UI as LangSmith UI
+    App->>App: 设 LANGSMITH_TRACING 等环境变量
+    App->>CB: agent.invoke 触发事件流
+    CB->>CB: 收集每个 run 的输入输出耗时用量
+    CB-->>API: 异步批量上报 不阻塞主链路
+    API->>API: 按 parentRunId 重建 trace 树
+    UI->>API: 查询项目下的 trace
+    API-->>UI: 返回树结构供点开排查
+```
+
+图 2-1：应用到 LangSmith 的 trace 上报数据流。上报是异步的，不会拖慢 Agent 响应。
+
 注意 LangChain.js 1.x 的 `langsmith` SDK 升级到 0.3+，跟 0.2 系列在 API 上有一些细节差异（主要是 `Client`、`traceable`、`evaluate` 的签名收紧），下面的代码都按 0.3+ 写。
 
 ## 按环境分项目

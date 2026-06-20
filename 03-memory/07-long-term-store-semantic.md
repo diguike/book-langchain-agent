@@ -16,7 +16,23 @@ LangGraph 用 **Store** 干这件事。[1.x 时代的记忆系统](./01-memory-o
 
 ## Store 配上 embeddings 就能语义检索
 
-普通 store 是个带 namespace 的键值库，`search` 只能按前缀和元数据过滤。给它配一个 embeddings 模型，`search` 就升级成向量相似度检索：
+普通 store 是个带 namespace 的键值库，`search` 只能按前缀和元数据过滤。给它配一个 embeddings 模型，`search` 就升级成向量相似度检索。如图 3-6 所示，`put` 写入时自动算 embedding 入库，`search` 带 `query` 时把 query 也嵌入，按 cosine 相似度召回——这就是"用户对花生过敏"能被"饮食限制"召回的原理。
+
+```mermaid
+graph LR
+    subgraph Put["put 写入"]
+        V1["value.text"] --> EM1["embeddings 嵌入"]
+        EM1 --> DB[("Store<br/>namespace + 向量")]
+    end
+    subgraph Search["search 召回"]
+        Q["query"] --> EM2["embeddings 嵌入"]
+        EM2 --> SIM["按 cosine 相似度排序"]
+        DB --> SIM
+        SIM --> R["命中片段 + score"]
+    end
+```
+
+<small>图 3-6：Store 语义召回的数据流。写入和检索都经过同一个 embeddings 模型，按向量相似度匹配</small>
 
 ```typescript
 import { InMemoryStore } from "@langchain/langgraph";

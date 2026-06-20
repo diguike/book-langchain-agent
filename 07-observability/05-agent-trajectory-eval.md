@@ -22,7 +22,19 @@ last_synced: "2026-06-20T20:08:16+08:00"
 npm install agentevals @langchain/core
 ```
 
-它给两条评估路径：**规则匹配**（确定性、零成本、不调模型）和 **LLM 评判**（灵活、能评没有标准答案的轨迹）。
+它给两条评估路径：**规则匹配**（确定性、零成本、不调模型）和 **LLM 评判**（灵活、能评没有标准答案的轨迹）。如图 5-1 所示，同一条实际轨迹按是否有标准答案分流到两条评估路径，最终都产出一个 score。
+
+```mermaid
+graph TB
+    AT[实际轨迹<br/>Agent 跑出的消息数组<br/>含 tool_calls] --> Q{有标准轨迹吗}
+    Q -->|有| RM[规则匹配<br/>createTrajectoryMatchEvaluator]
+    Q -->|没有 / 好路径多样| LJ[LLM 评判<br/>createTrajectoryLLMAsJudge]
+    REF[参考轨迹] --> RM
+    RM --> S1[score: true/false<br/>零成本 确定]
+    LJ --> S2[score + comment<br/>花 token 有主观性]
+```
+
+图 5-1：轨迹评估的两条路径。有标准流程走规则匹配（strict / unordered / subset / superset），开放任务走 LLM 评判，两者可叠加。
 
 > 一个诚实的提醒：`agentevals` 写作时还是 `0.0.x` 版本，属早期阶段，导出 API 可能小幅变动。下面的用法以当前版本为准，升级时留意 changelog。
 

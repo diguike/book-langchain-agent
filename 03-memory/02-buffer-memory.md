@@ -68,7 +68,25 @@ ANTHROPIC_API_KEY=sk-ant-xxx npx tsx buffer-demo.ts
 
 ## checkpointer 到底做了什么
 
-每次 `agent.invoke` 跑完，LangGraph 会把这一刻的完整 state（默认就是 `messages` 数组）打包成一个 **checkpoint**，按 `thread_id` 存到 checkpointer 里。下一次同 `thread_id` 再 invoke，框架在执行前先把最新 checkpoint 读出来作为初始 state。
+每次 `agent.invoke` 跑完，LangGraph 会把这一刻的完整 state（默认就是 `messages` 数组）打包成一个 **checkpoint**，按 `thread_id` 存到 checkpointer 里。下一次同 `thread_id` 再 invoke，框架在执行前先把最新 checkpoint 读出来作为初始 state。如图 3-2 所示，这就是"你只传新消息、框架自动补全历史"的全过程。
+
+```mermaid
+sequenceDiagram
+    participant App as 应用代码
+    participant Agent as createAgent
+    participant CP as Checkpointer
+    participant M as 模型
+    App->>Agent: invoke(新消息, thread_id)
+    Agent->>CP: 1. 按 thread_id 读最新 checkpoint
+    CP-->>Agent: 2. 历史 messages
+    Agent->>Agent: 3. 历史 + 新消息 拼成完整 state
+    Agent->>M: 4. 带完整上下文调用
+    M-->>Agent: 5. AI 回复
+    Agent->>CP: 6. 写回新 checkpoint
+    Agent-->>App: 7. 返回结果
+```
+
+<small>图 3-2：一次有记忆的 invoke。框架在调模型前自动加载历史、调用后自动落盘</small>
 
 可以理解为每个 thread 是一棵 checkpoint 树：
 

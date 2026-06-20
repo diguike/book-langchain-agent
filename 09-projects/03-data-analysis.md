@@ -49,6 +49,26 @@ data-analysis/
     └── orders.csv              # 示例数据
 ```
 
+一次完整问答里，这三个工具是有固定先后顺序的：先 `load_data` 把文件灌进内存库，再 `inspect_schema` 拿到真实表结构，模型据此写 SELECT 交给 `run_sql` 沙箱执行，最后把结果喂给 `plot_chart` 生成图表配置并口语化解读。如图 9-3 所示，`inspect_schema` 是写 SQL 前的强制前置步骤，跳过它模型就会凭想象写错字段名。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant A as 数据分析 Agent
+    participant DB as 内存 SQLite
+    U->>A: 加载 orders.csv 并问每个城市订单量
+    A->>DB: load_data 导入 CSV 建表
+    DB-->>A: 表名 行数 字段
+    A->>DB: inspect_schema 查表结构
+    DB-->>A: 字段名与类型
+    A->>DB: run_sql 只读 SELECT
+    DB-->>A: 结果集 截断前 200 行
+    A->>A: plot_chart 生成 ECharts 配置
+    A-->>U: 图表配置 + 中文解读
+```
+
+> 图 9-3：数据分析 Agent 的工具调用时序。`run_sql` 经过只读校验、强制 LIMIT、结果截断三道处理（对应 `src/tools/sql.ts`），再回到模型生成图表与解读。
+
 ## 进程内 SQLite 会话
 
 数据加载和查询都在同一个内存 SQLite 实例里完成，避免文件状态在工具之间走丢：

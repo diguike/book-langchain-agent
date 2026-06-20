@@ -486,6 +486,30 @@ app.post("/approve", async (c) => {
 export default app;
 ```
 
+退款审批是这个项目里链路最长的一条：用户消息进来，经 Supervisor 分诊到退款 Agent，middleware 检测到金额超阈值抛出 interrupt 把流程挂起，前端收到 `approval_required` 事件，审批员通过 `/approve` 接口 resume，graph 才从挂起点继续把退款执行完。如图 9-1 所示，关键在于 `/chat` 与 `/approve` 是两次独立的 HTTP 请求，中间靠 checkpointer 保存的 thread state 把执行续起来。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户前端
+    participant H as Hono 服务
+    participant G as LangGraph
+    participant A as 审批员前端
+    U->>H: 1. POST /chat 退款 1500 元
+    H->>G: 2. graph.stream
+    G->>G: 3. Supervisor 分诊到 refund
+    G->>G: 4. middleware 检测金额超阈值
+    G-->>H: 5. 抛 GraphInterrupt 挂起
+    H-->>U: 6. SSE approval_required
+    H-->>A: 7. 通知待审批
+    A->>H: 8. POST /approve approved
+    H->>G: 9. Command resume
+    G->>G: 10. 从挂起点执行退款
+    G-->>H: 11. 退款结果
+    H-->>U: 12. SSE 推送回复
+```
+
+> 图 9-1：退款 HITL 审批的跨请求时序。`/chat`（步骤 1-6）和 `/approve`（步骤 8-12）是两次独立请求，靠 `MemorySaver` / `PostgresSaver` 持久化的 thread state 衔接，对应 `src/index.ts` 的两个路由。
+
 ## package.json
 
 ```json

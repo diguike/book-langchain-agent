@@ -17,6 +17,28 @@ LangChain.js 1.x 在所有 `Runnable` 上提供两套流式 API：
 
 这一节先把这两个 API 讲透，再点一下 SSE (Server-Sent Events) / WebSocket 的集成思路。完整的服务端实现细节放在 [08-生产部署 / 02-streaming-api.md](../08-production/02-streaming-api.md)。
 
+流式的核心价值是首 token 尽快到达客户端。如图 2-4 所示，模型每吐出一个 chunk 就沿链向下游推，最终经 SSE 实时回传，用户在百毫秒级就看到"开始打字"。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户/浏览器
+    participant C as Chain (.stream)
+    participant M as ChatModel
+    participant P as Provider
+    U->>C: 1. invoke 输入
+    C->>M: 2. 启动流式调用
+    M->>P: 3. 请求 LLM
+    loop 每个 token
+        P-->>M: 4. token chunk
+        M-->>C: 5. AIMessageChunk
+        C-->>U: 6. SSE data 事件
+    end
+    P-->>M: 7. 结束
+    C-->>U: 8. done 事件
+```
+
+<small>图 2-4：token 流式时序，chunk 从 provider 逐个产出并沿链推送到客户端</small>
+
 ## `.stream()`：最常用的流
 
 ```typescript
@@ -46,7 +68,17 @@ console.log();
 
 ## 哪些节点会阻断流
 
-这是流式最关键的一条规则：**链里只有最末端能真正流式，前面任何"必须等完整输入才能工作"的节点都会把流截掉**。
+这是流式最关键的一条规则：**链里只有最末端能真正流式，前面任何"必须等完整输入才能工作"的节点都会把流截掉**。如图 2-5 所示，一旦链路中间出现阻断节点，它上游攒齐完整输出后才往下走，末端就只能一次性吐出，流式效果就丢了。
+
+```mermaid
+graph LR
+    M["ChatModel<br/>逐 chunk"] -->|流式| PA["StringOutputParser<br/>逐 chunk"]
+    PA -->|流式| L["普通 RunnableLambda<br/>等完整输入"]
+    L -->|阻断| OUT["客户端<br/>一次性收到"]
+    style L fill:#ffd9d9
+```
+
+<small>图 2-5：阻断节点切断流式。普通 lambda / 结构化输出 / 工具调用必须等完整输入，会把流截成一次性输出</small>
 
 LangChain.js 1.x 的真实表现：
 

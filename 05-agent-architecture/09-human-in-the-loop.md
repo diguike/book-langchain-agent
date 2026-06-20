@@ -27,7 +27,27 @@ LangGraph 1.x 把这件事抽象成 **typed interrupt** —— 用 TypeScript �
 | `interrupt(payload)` | 在节点内部调用，立即暂停 graph，把 `payload` 传给调用方 |
 | `Command({ resume: value })` | 用户做完决定后，把 `value` 作为 `interrupt()` 的返回值喂回去 |
 
-底层依赖 checkpointer——`interrupt` 之前的所有 state 都已经被持久化，进程可以重启、用户可以隔天回来，凭 `thread_id` 找到那个暂停点继续。
+底层依赖 checkpointer——`interrupt` 之前的所有 state 都已经被持久化，进程可以重启、用户可以隔天回来，凭 `thread_id` 找到那个暂停点继续。整个"暂停 → 人审 → 恢复"的链路如图 5-7 所示。
+
+```mermaid
+sequenceDiagram
+    participant U as 调用端/前端
+    participant G as Graph
+    participant CP as Checkpointer
+    participant H as 审批人
+    U->>G: 第一次 invoke
+    G->>G: 跑到 interrupt(payload) 暂停
+    G->>CP: 持久化当前 state 与暂停点
+    G-->>U: 返回 __interrupt__ 待审载荷
+    U->>H: 展示待审信息 可隔几天
+    H-->>U: 做出决策 approve/edit/reject
+    U->>G: invoke(Command({ resume: 决策 }))
+    G->>CP: 从暂停点恢复 state
+    G->>G: interrupt() 返回决策 继续执行
+    G-->>U: 最终结果
+```
+
+图 5-7：HITL 的暂停-恢复时序。`interrupt()` 暂停并落盘，调用端拿到待审载荷后可以等任意时长；人审完用 `Command({ resume })` 把决策喂回，graph 从同一 `thread_id` 的暂停点接着跑。
 
 最小示例：
 

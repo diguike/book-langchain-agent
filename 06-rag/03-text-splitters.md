@@ -16,7 +16,22 @@ last_synced: "2026-06-20T20:35:22+08:00"
 2. **chunk 是检索的最小单位**：一个 chunk 装两段无关内容，命中其中一段时另一段就是噪声
 3. **Context 不是越多越好**：研究反复证明 LLM 存在 "Lost in the Middle"——上下文中间段的信息会被忽略，塞 20K token 不如精准给 2K
 
-分块要解决的是粒度平衡：太大噪声多，太小丢上下文。本节按"够用到精细"的顺序讲四种 splitter。
+分块要解决的是粒度平衡：太大噪声多，太小丢上下文。本节按"够用到精细"的顺序讲四种 splitter，它们各自适用的输入类型如图 6-1 所示。
+
+```mermaid
+graph TB
+    DOC[长 Document] --> Q{文档类型?}
+    Q -->|通用文本| R[RecursiveCharacterTextSplitter<br/>按段落-行-句递归切]
+    Q -->|Markdown / HTML| M[Header Splitter<br/>按标题切, 标题进 metadata]
+    Q -->|token 预算紧| T[TokenTextSplitter<br/>按 token 数切]
+    Q -->|叙述类, 话题多变| S[语义分块<br/>按 embedding 距离找断点]
+    M --> R
+    R --> C[大小合适的 chunks]
+    T --> C
+    S --> C
+```
+
+图 6-1：按文档类型选择切分策略，Markdown 走"标题切 + 二次字符切"两段流水线
 
 ## RecursiveCharacterTextSplitter：默认选它
 

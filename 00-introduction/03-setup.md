@@ -6,6 +6,22 @@ last_synced: "2026-06-20T20:08:16+08:00"
 
 本指南将带你从零搭建 LangChain.js 开发环境。全程预计 **30-60 分钟**，完成后你将拥有一个可运行的 TypeScript + LangChain.js 项目。
 
+整个搭建过程按下图的顺序推进，每一步都是后一步的前提：
+
+```mermaid
+graph LR
+    A["安装 Node.js 22+"] --> B["初始化项目<br/>npm init + tsconfig"]
+    B --> C["安装 LangChain 核心包"]
+    C --> D["配置 .env<br/>填入 API Key"]
+    D --> E["写 Hello World"]
+    E --> F{"npm start<br/>跑通?"}
+    F -->|是| G["环境就绪"]
+    F -->|否| H["对照排查表<br/>修正后重试"]
+    H --> E
+```
+
+图 0-1：环境搭建步骤流程。最后一步用 Hello World 脚本验证，跑不通就回到排查表（见文末）定位问题。
+
 ---
 
 ## 一、安装 Node.js 22+

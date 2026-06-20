@@ -58,7 +58,23 @@ npx @langchain/langgraph-cli dev
 # Server 跑在 http://localhost:2024，自带 LangGraph Studio 可视化调试
 ```
 
-就这样。你没写一行 HTTP 路由，但已经有了完整的 threads / runs / assistants / store API，外加一个可视化调试台 Studio。`createAgent` 内部的 checkpointer、中断恢复、流式，全部由 Server 接管。
+就这样。你没写一行 HTTP 路由，但已经有了完整的 threads / runs / assistants / store API，外加一个可视化调试台 Studio。`createAgent` 内部的 checkpointer、中断恢复、流式，全部由 Server 接管。从一个配置文件到一整套 REST 面的映射关系如图 8-11 所示。
+
+```mermaid
+graph TB
+    CFG[langgraph.json graphs agent 指向 src/agent.ts] --> SV[LangGraph Server 运行时]
+    SV --> AS[assistants 列出创建 assistant]
+    SV --> TH[threads 会话状态与历史]
+    SV --> RN[runs 发起流式取消运行]
+    SV --> ST[store 长期记忆读写检索]
+    SV --> CR[crons 定时触发]
+    SV --> STU[Studio 可视化调试]
+    AS -.assistantId.-> FE[前端 useStream 或 Client SDK]
+    TH -.-> FE
+    RN -.-> FE
+```
+
+图 8-11：langgraph.json 到 Server 的架构。一个配置文件声明 graph，Server 把它展开成 assistants / threads / runs / store / crons 全套 REST API，前端用 `assistantId` 接上。
 
 ## 三种部署形态
 
@@ -70,7 +86,19 @@ LangGraph Server 有三种跑法，**对前端代码零差异**——永远是 `
 | 自托管容器 | `langgraphjs up` / `build` | 8123 | Docker + `LANGSMITH_API_KEY` | 本地容器验证、自己上 K8s |
 | 托管 Platform | 连 GitHub 仓库 | 平台分配 | LangSmith 账号 | 托管生产，自动构建部署 |
 
-注意 `dev` 和 `up` 的**默认端口不一样**（2024 vs 8123），前端 `apiUrl` 要对得上。
+注意 `dev` 和 `up` 的**默认端口不一样**（2024 vs 8123），前端 `apiUrl` 要对得上。三种形态跑的是同一套 Server，对前端只是换 `apiUrl` / `assistantId` / `apiKey` 三个参数，如图 8-12 所示。
+
+```mermaid
+graph LR
+    G[同一份 graph + langgraph.json] --> D[本地 dev 端口 2024 无需 Docker]
+    G --> U[自托管 build/up 端口 8123 Docker 镜像]
+    G --> M[托管 Platform 连 GitHub 自动构建]
+    D -.apiUrl assistantId apiKey.-> FE[前端 useStream 零改动]
+    U -.-> FE
+    M -.-> FE
+```
+
+图 8-12：三种部署形态对比。同一份 graph 派生出本地开发 / 自托管镜像 / 托管 Platform，差异只在部署侧，前端代码完全不变。
 
 自托管出镜像：
 

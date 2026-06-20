@@ -27,6 +27,24 @@ Thought  →  Action  →  Observation  →  Thought  →  Action  →  Observat
 
 换句话说，**用 `createAgent` 创建出来的 Agent 默认就是 ReAct Agent**。这一节要讲的是怎么让这个循环里的"thinking"真正可见——以及怎么调它。
 
+把这个循环按时间轴展开，就是图 5-2：模型每轮先 Thought（决定调谁）再发 Action（工具调用），工具节点回灌 Observation，模型读完决定继续还是给出 Final Answer。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant M as model 节点
+    participant T as tools 节点
+    U->>M: 提问
+    loop 直到模型不再产出 tool_calls
+        M->>M: Thought 决定下一步
+        M->>T: Action 带 tool_calls 的消息
+        T-->>M: Observation 工具结果回灌为 ToolMessage
+    end
+    M-->>U: Final Answer 最终回复
+```
+
+图 5-2：ReAct 循环的时序展开。Thought 隐含在模型对"调哪个工具"的选择里，Action 是工具调用，Observation 是工具返回，循环条件是模型最后一条消息里还有没有 `tool_calls`。
+
 ## 跟 Chain-of-Thought 的区别
 
 新手很容易混淆 ReAct 和 Chain-of-Thought（CoT）。差别就一条：**是否跟外部世界交互**。

@@ -268,6 +268,20 @@ LangSmith Playground 是我做 prompt 调优的主战场。它直接连到你的
 
 第 5 步是关键。Playground 改完看着好，但跑一遍 dataset 才能确认其他 case 没退化。
 
+这个工作流是一个闭环，如图 4-1 所示：从生产坏 case 出发改 prompt，必须跑过 dataset evaluator 确认没引入回归才发版；只要指标退化就退回继续改，绝不靠手感直接上线。
+
+```mermaid
+graph LR
+    A[生产 trace<br/>找低分坏 case] --> B[Playground 复现]
+    B --> C[改 prompt<br/>加规则 / few-shot]
+    C --> D[跑 dataset evaluator]
+    D -->|指标提升 不退化| E[发版]
+    D -->|有回归| C
+    E -.线上新坏 case.-> A
+```
+
+图 4-1：prompt 优化的评估驱动闭环。每次改动都要过 evaluator 这道关，把「感觉变好了」换成可量化的指标变化。
+
 ## LangSmith Hub：远程 prompt 仓库
 
 LangSmith Hub 把 prompt 当 Git 仓库管。每次推送都有版本号，commit message，可以 rollback。

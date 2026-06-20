@@ -92,7 +92,24 @@ const GoodState = Annotation.Root({
 
 ## Reducer 详解
 
-Reducer 是个 `(current, update) => newValue` 函数，决定一个字段被并发节点同时更新时怎么合并。最常见的几种模式：
+Reducer 是个 `(current, update) => newValue` 函数，决定一个字段被并发节点同时更新时怎么合并。节点返回的"部分 state"不会直接覆盖旧 state，而是按字段逐个走各自的 reducer，如图 5-3 所示。
+
+```mermaid
+graph LR
+    Old[旧 state] --> R1[messages reducer 追加]
+    Update[节点返回的部分 state] --> R1
+    Old --> R2[iteration reducer 累加]
+    Update --> R2
+    Old --> R3[response 无 reducer 覆盖]
+    Update --> R3
+    R1 --> New[合并后的新 state]
+    R2 --> New
+    R3 --> New
+```
+
+图 5-3：节点更新如何按字段逐个走 reducer 合并。同一次返回里，`messages` 走追加、`iteration` 走累加、`response` 直接覆盖——每个字段的合并语义由它自己的 reducer 决定，互不影响。
+
+最常见的几种模式：
 
 ### 追加
 
@@ -281,7 +298,19 @@ console.log(aliceState.values.messages); // 只有 Alice 那条
 
 ## 查看与回溯状态
 
-Checkpointer 不光存"最新 state"，它存的是**每一步的快照**。这开启了三个能力：
+Checkpointer 不光存"最新 state"，它存的是**每一步的快照**。一个 `thread_id` 下，每个节点跑完都落一份 checkpoint，串成一条按时间排列的快照链，如图 5-4 所示。`getState` 取链尾、`getStateHistory` 遍历整条链、Time travel 指定某个旧 `checkpoint_id` 重新分叉出新路径。
+
+```mermaid
+graph LR
+    CP0[checkpoint 0 初始] --> CP1[checkpoint 1 节点A后]
+    CP1 --> CP2[checkpoint 2 节点B后]
+    CP2 --> CP3[checkpoint 3 当前 getState 取这里]
+    CP1 -.Time travel 从旧点重跑.-> CPX[checkpoint X 新分支]
+```
+
+图 5-4：同一 `thread_id` 下的 checkpoint 快照链。实线是正常推进，虚线是 Time travel——指定旧 `checkpoint_id` 加新输入，从那一刻分叉出一条新路径。
+
+这开启了三个能力：
 
 ### `getState`：当前 state
 

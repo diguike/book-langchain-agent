@@ -257,6 +257,24 @@ createAgent({
 `afterModel` 按 `rateLimit → cache → audit` 顺序触发（**逆序**）；  
 `wrapModelCall` 是洋葱嵌套，`audit` 在最外层，`rateLimit` 最贴近真实调用。
 
+这个"进去正序、出来逆序"的洋葱模型如图 5-6 所示。一次模型调用穿过每一层 middleware 两次：进的时候从外到内，出的时候从内到外。
+
+```mermaid
+sequenceDiagram
+    participant A as audit 外层
+    participant C as cache 中层
+    participant Rl as rateLimit 内层
+    participant Model as 真实模型调用
+    A->>C: beforeModel 正序进入
+    C->>Rl: beforeModel
+    Rl->>Model: 调用模型
+    Model-->>Rl: 返回
+    Rl-->>C: afterModel 逆序返回
+    C-->>A: afterModel
+```
+
+图 5-6：三个 middleware 的洋葱执行顺序。`beforeModel` 按注册顺序正序触发，`afterModel` 逆序触发；`wrapModelCall` 同样是外层先进、内层先出，所以"限流要包在重试外层"这类顺序约束才成立。
+
 实际项目里推荐这个分层：
 
 ```

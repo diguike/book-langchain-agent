@@ -270,6 +270,27 @@ npm ls @langchain/core
 
 ## 通用排查步骤
 
+碰到不在上面十类里的问题，按图所示的决策路径走一遍，能快速把问题收敛到模型层、Agent 编排层还是工具层。如图所示，第一刀永远是"模型层单独 invoke 通不通"，先把凭证和网络问题排掉，再往上层查。
+
+```mermaid
+flowchart TD
+    Start[Agent 行为异常] --> Q1{模型单独 invoke 通吗}
+    Q1 -->|不通| Cred[排查凭证 / 网络 / provider]
+    Q1 -->|通| Q2{有输出吗}
+    Q2 -->|无任何输出| Stream[检查 streamMode 与 stream/invoke 用法]
+    Q2 -->|有输出但不对| Q3{该调工具却没调吗}
+    Q3 -->|是| Tool[改 description / system prompt / 换模型]
+    Q3 -->|否| Q4{对话历史串了或丢了吗}
+    Q4 -->|是| Ckpt[检查 thread_id 与 checkpointer]
+    Q4 -->|否| Trace[开 LangSmith Trace 看完整调用链]
+    Cred --> Trace
+    Stream --> Trace
+    Tool --> Trace
+    Ckpt --> Trace
+```
+
+> 图：通用排查决策流。无论最终走到哪条分支，开 LangSmith Tracing 看完整调用链都是兜底动作——90% 的 Agent 问题靠 Trace 能直接定位。
+
 ### 1. 先开 LangSmith Tracing
 
 90% 的 Agent 问题靠看 Trace 就能定位。本地开发设环境变量即可：

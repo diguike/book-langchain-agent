@@ -159,6 +159,28 @@ docker-compose logs -f agent
 
 QPS 上百 / 需要 99.9% SLA 后，单体不够。上 K8s 之前先把状态拆出去——这是水平扩展的前提。
 
+一套典型的 K8s 多副本生产部署，从入口到状态依赖的整体拓扑如图 8-9 所示。无状态的 Agent 副本可以随 HPA 任意扩缩，对话历史、缓存、向量检索全部外置到独立存储。
+
+```mermaid
+graph TB
+    C[客户端] --> IG[Ingress 关闭 proxy_buffering]
+    IG --> A1[Agent Pod 1]
+    IG --> A2[Agent Pod 2]
+    IG --> A3[Agent Pod N HPA 扩缩]
+    A1 --> PG[(Postgres checkpointer 对话历史)]
+    A2 --> PG
+    A3 --> PG
+    A1 --> RD[(Redis 缓存 限流)]
+    A2 --> RD
+    A3 --> RD
+    A1 --> VE[(pgvector 向量库 RAG)]
+    A1 --> LP[LLM Provider 主备 fallback]
+    A2 --> LP
+    A3 --> LP
+```
+
+图 8-9：K8s 多副本生产部署拓扑。Agent 副本无状态，状态全部外置到 Postgres / Redis / 向量库，因此任意副本都能处理任意 thread，HPA 可以激进扩缩。
+
 ### 状态外置
 
 LangGraph 1.x 的 checkpointer 决定了对话历史存哪。开发期用 `MemorySaver`（内存），生产必须用 Postgres 或 Redis：
@@ -723,6 +745,21 @@ async function robustInvoke(input: any) {
   }
 }
 ```
+
+主备切换的判定逻辑如图 8-10 所示：只有可重试的故障（限流、5xx、连接错误）才切到备用 provider，业务错误直接抛出，避免把 bug 当成故障无意义地重试。
+
+```mermaid
+flowchart TD
+    REQ[请求] --> P[主模型 Anthropic]
+    P -->|成功| OK[返回结果]
+    P -->|抛错| J{可重试故障}
+    J -->|503 529 rate_limit 连接错误| FB[备用模型 OpenAI]
+    J -->|其他业务错误| TH[直接抛出]
+    FB -->|成功| OK
+    FB -->|失败| TH
+```
+
+图 8-10：Provider 容灾切换流程。只对可重试的故障切备用模型，业务错误直接抛出。`.withFallbacks` 把这套逻辑对 Agent 透明化。
 
 更稳的做法是**用 LangChain 内置的 `.withFallbacks([...])`**：
 

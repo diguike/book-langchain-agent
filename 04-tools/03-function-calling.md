@@ -16,7 +16,21 @@ last_synced: "2026-06-20T20:08:16+08:00"
 - **Anthropic** 的 Tool Use 用 `input_schema` 而非 `parameters`，工具调用混在 `content` block 里（`type: "tool_use"`），参数是对象
 - **Google Gemini** 用 `functionDeclarations` 包装，类型名大写（`OBJECT`、`STRING`）
 
-LangChain.js 1.x 把这些差异都封在 `createAgent` 内部。你只写一次 Tool，传同一个数组进去，背后哪家模型都能跑。
+LangChain.js 1.x 把这些差异都封在 `createAgent` 内部。你只写一次 Tool，传同一个数组进去，背后哪家模型都能跑。这条统一路径如图 4-4 所示：同一个 tools 数组在进入不同厂商前被翻译成各家协议格式，返回的 tool_calls 又被标准化回同一种结构，应用层只看到统一的 `{ name, args }`。
+
+```mermaid
+flowchart LR
+    T[同一份 tools 数组] --> A[createAgent 抽象层]
+    A -->|tools 参数| O[OpenAI]
+    A -->|input_schema| C[Anthropic]
+    A -->|functionDeclarations| G[Gemini]
+    O -->|tool_calls JSON 字符串| N[标准化为统一 tool_call]
+    C -->|tool_use 对象| N
+    G -->|functionCall.args| N
+    N --> R[执行工具并回灌结果]
+```
+
+图 4-4：一份 Tool 跨三家协议——createAgent 抹平入参格式与返回结构的差异
 
 ## 1.x 的统一模式：直接传 tools 给 createAgent
 

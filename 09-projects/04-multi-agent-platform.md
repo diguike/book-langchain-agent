@@ -497,6 +497,25 @@ data: {"node":"writer","payload":{...}}
 event: done
 ```
 
+运行时的执行节奏值得单独看一眼。编译完成后，控制权始终在 Supervisor 和 Worker 之间往返：Supervisor 每被唤醒一次就用结构化输出决策"下一个谁来干"，用 `Command({ goto })` 跳到对应 Worker，Worker 执行完又用 `Command({ goto: "supervisor" })` 把结果回流，直到 Supervisor 判定 `done` 或撞到 `maxSteps`。如图 9-4 所示，Worker 之间从不直接连边，全部经 Supervisor 中转，这正是动态编排区别于静态流水线的地方。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant S as Supervisor
+    participant R as researcher
+    participant W as writer
+    U->>S: 写一篇 RAG 短文
+    S->>R: goto researcher + 指令
+    R-->>S: goto supervisor + 调研结论
+    S->>W: goto writer + 指令
+    W-->>S: goto supervisor + 文章草稿
+    S->>S: 判定 done 或达 maxSteps
+    S-->>U: 合并所有 worker 输出
+```
+
+> 图 9-4：Supervisor + Worker 的运行时往返时序。每次跳转都靠 `Command({ goto, update })` 完成（对应 `src/compiler.ts` 的 `supervisorNode` 与 `makeWorkerNode`），`step` 计数器到 `maxSteps` 时强制终止防死循环。
+
 ## Supervisor + Worker 模式的关键点
 
 1. **Supervisor 用 `Command({ goto, update })` 显式跳转**——比 `addConditionalEdges` 灵活，状态更新和路由一起返回

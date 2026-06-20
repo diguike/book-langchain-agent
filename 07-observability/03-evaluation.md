@@ -43,7 +43,18 @@ LangSmith 的离线评估有三个核心概念：
 - **Target function**：被评估的函数，输入 `inputs`，输出 `outputs`
 - **Evaluator**：拿 `inputs` / `outputs` /（可选）`reference_outputs`，给出一个或多个 `key + score + comment`
 
-跑 `evaluate(target, { data: dataset, evaluators: [...] })` 就把 dataset 的每个例子喂给 target，每个 evaluator 都打分，结果写回 LangSmith。
+跑 `evaluate(target, { data: dataset, evaluators: [...] })` 就把 dataset 的每个例子喂给 target，每个 evaluator 都打分，结果写回 LangSmith。整个流程如图 3-1 所示。
+
+```mermaid
+graph LR
+    D[Dataset<br/>inputs + reference_outputs] --> T[Target function<br/>跑 Agent 产出 outputs]
+    T --> EV[Evaluator<br/>规则 / LLM-as-judge]
+    D -. reference_outputs .-> EV
+    EV --> SC[key + score + comment]
+    SC --> EXP[LangSmith 实验记录<br/>支持 A/B 对比]
+```
+
+图 3-1：离线评估的数据流。Dataset 的每个例子先经 target 跑出 outputs，再连同 inputs / reference_outputs 一起交给 evaluator 打分，结果汇总成一条实验记录。
 
 最小可跑的例子：
 

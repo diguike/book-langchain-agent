@@ -10,7 +10,17 @@ last_synced: "2026-06-20T20:35:22+08:00"
 
 一条真实的 LLM 链路从来不止一步。我做一个最简单的"回答用户问题"功能，至少要走：构造 prompt → 调模型 → 解析输出 → 后处理。这四步如果用普通函数串起来，参数传递、错误处理、流式支持都得自己写一遍；用 LCEL (LangChain Expression Language) 组装，这些能力开箱即用。
 
-`RunnableSequence` 是 LCEL 中最基础的组合原语：把多个 `Runnable` 按顺序拼成一条流水线，前一个的输出就是后一个的输入。这一节把它讲透，后面的 Parallel / Branch / Streaming 都建立在它的基础上。
+`RunnableSequence` 是 LCEL 中最基础的组合原语：把多个 `Runnable` 按顺序拼成一条流水线，前一个的输出就是后一个的输入。如图 2-1 所示，数据从输入开始，逐步被每个节点变换，类型也随之接龙。这一节把它讲透，后面的 Parallel / Branch / Streaming 都建立在它的基础上。
+
+```mermaid
+graph LR
+    IN["输入<br/>concept: string"] --> P["prompt<br/>填充模板"]
+    P --> M["model<br/>调用 LLM"]
+    M --> PA["parser<br/>取纯文本"]
+    PA --> OUT["输出<br/>string"]
+```
+
+<small>图 2-1：RunnableSequence 的单向数据流，前一步输出即下一步输入</small>
 
 LCEL 的概念页面在官方文档：[Runnables](https://docs.langchain.com/oss/javascript/langchain/runnables)。
 

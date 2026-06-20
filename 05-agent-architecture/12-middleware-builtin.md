@@ -186,7 +186,19 @@ llmToolSelectorMiddleware({
 
 middleware 是**洋葱模型**：数组里靠前的包在外层。`beforeModel` 按数组正序执行，`afterModel` 按逆序执行；`wrapModelCall` / `wrapToolCall` 也是外层先进、内层先出。
 
-这意味着顺序会改变行为。一个实际例子：限流要包在重试外层，否则重试会绕过限流计数。
+这意味着顺序会改变行为。一个实际例子：限流要包在重试外层，否则重试会绕过限流计数。两种排法的差异如图 5-9 所示。
+
+```mermaid
+graph LR
+    subgraph 正确 限流在外 重试在内
+    L1[toolCallLimit 数总次数] --> Rt1[toolRetry 内部重试 2 次] --> Call1[一次工具调用 只计 1 次]
+    end
+    subgraph 错误 重试在外 限流在内
+    Rt2[toolRetry 每次重试都重新进入] --> L2[toolCallLimit 每次重试都 +1] --> Call2[3 次重试吃掉 3 次额度]
+    end
+```
+
+图 5-9：middleware 顺序如何改变限流行为。限流在外层时，一次工具调用内部的多次重试只算 1 次；调反则每次重试都计入额度，10 次额度可能 3 个工具就用光。
 
 ```typescript
 const agent = createAgent({

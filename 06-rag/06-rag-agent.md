@@ -311,7 +311,7 @@ const out = await correctiveRag.invoke({
 console.log(out.answer);
 ```
 
-状态机长这样：
+状态机的流转如图 6-1 所示——检索后评估，有相关文档就生成，没有就改写查询回到检索，重试到上限则强制走 generate 的 fallback：
 
 ```mermaid
 graph LR
@@ -324,6 +324,8 @@ graph LR
     Gen --> END([END])
 ```
 
+图 6-1：Corrective RAG 状态机——评估不通过则改写重试，重试上限后兜底生成
+
 跟 createAgent 路线相比，这里的优势：
 
 - 评估相关性的 prompt 完全可控（你可以塞业务规则）
@@ -333,6 +335,22 @@ graph LR
 ### Adaptive RAG：先分类再分流
 
 更复杂的场景：闲聊不走检索、内部问题走 KB、最新信息走 web search。把"分类"作为入口节点。
+
+入口节点先给问题分类，再按类别分流到不同分支——闲聊直接答、内部问题走 KB、最新信息走 web search，KB 和 web 两路最后汇到同一个生成节点，如图 6-2 所示。
+
+```mermaid
+graph LR
+    START([START]) --> C[classify 分类]
+    C -->|chitchat| CH[chitchat 直接回答]
+    C -->|kb| KB[kb_retrieve 检索内部库]
+    C -->|web| WEB[web_retrieve 走 Tavily]
+    KB --> GEN[generate 生成答案]
+    WEB --> GEN
+    CH --> END([END])
+    GEN --> END
+```
+
+图 6-2：Adaptive RAG 先分类再分流，KB 与 web 两路汇入同一生成节点
 
 下面代码中的 `judge` / `writer` / `vectorStore` / `webSearch` 沿用前面 Corrective RAG 一节的定义（模型 + 内部向量库 + Tavily），这里只展示新增的图结构：
 

@@ -84,6 +84,29 @@ await agent.invoke(
 
 跑一次能看到 `llm start → tool start → tool end → llm start → llm end` 这条完整链路的日志。
 
+这条链路上 callback 事件的触发顺序如图 1-1 所示：runtime callbacks 顺着调用栈从 Agent 向下传递到 Chain（LangGraph 节点）、Model、Tool，每个组件在自己生命周期的起止点回调 handler。
+
+```mermaid
+sequenceDiagram
+    participant A as agent.invoke
+    participant H as Handler
+    participant M as Model
+    participant T as Tool
+    A->>H: handleChainStart
+    A->>M: 第一次模型调用
+    M->>H: handleLLMStart
+    M->>H: handleLLMEnd 含 tool_calls
+    A->>T: 执行工具
+    T->>H: handleToolStart
+    T->>H: handleToolEnd
+    A->>M: 第二次模型调用
+    M->>H: handleLLMStart
+    M->>H: handleLLMEnd 最终回答
+    A->>H: handleChainEnd
+```
+
+图 1-1：一次「模型决定调工具 → 执行工具 → 模型生成回答」中 callback 事件的触发时序。每个事件方法对应代码里覆写的 `handleXxx`。
+
 ## 完整的事件列表
 
 `BaseCallbackHandler` 提供的可覆写方法，按组件分组：
@@ -491,7 +514,21 @@ const model = new ChatAnthropic({
 export const agent = createAgent({ model, tools: [/* ... */], systemPrompt: "..." });
 ```
 
-LangSmith 拿到完整 trace 用于业务调试，Prometheus 拿到聚合指标用于 SRE 告警，BillingHandler 拿到成本数据写到自家计费库。三套同时跑，互不干扰。
+LangSmith 拿到完整 trace 用于业务调试，Prometheus 拿到聚合指标用于 SRE 告警，BillingHandler 拿到成本数据写到自家计费库。三套同时跑，互不干扰。如图 1-2 所示，同一个事件流被多个 handler 并行消费，各自落到不同的下游基础设施。
+
+```mermaid
+graph LR
+    E[LangChain 事件流<br/>LLM / Tool / Chain] --> S[LangSmith Handler<br/>环境变量自动注册]
+    E --> P[PromHandler]
+    E --> B[BillingHandler]
+    E --> O[OTelHandler]
+    S --> SU[LangSmith 全链路 trace]
+    P --> PU[Prometheus 聚合指标]
+    B --> BU[内部计费库]
+    O --> OU[OTel Collector]
+```
+
+图 1-2：一个事件流多路分发。每个 handler 是独立的消费者，互不干扰，可按需增删。
 
 ## 小结
 

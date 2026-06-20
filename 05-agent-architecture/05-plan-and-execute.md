@@ -35,6 +35,26 @@ graph LR
 
 Planner 和 Replanner 走结构化输出，Executor 是一个嵌套的 ReAct Agent（用 `createAgent` 创建），可以调工具。
 
+前面那张是节点拓扑，看不出"一次任务里这三个角色来回跑了几趟"。按时间轴展开就是图 5-5：Planner 只在开头跑一次，Executor 和 Replanner 成对循环——每执行一步就让 Replanner 评估一次，直到它决定 finish。
+
+```mermaid
+sequenceDiagram
+    participant P as Planner
+    participant E as Executor
+    participant R as Replanner
+    P->>P: 一次性拆出 3-7 步计划
+    loop 每次执行一步
+        P->>E: 交付当前计划
+        E->>E: 执行 plan[0] 当前步
+        E->>R: 提交本步结果
+        R->>R: 判断 continue / replan / finish
+        R-->>E: continue 弹掉本步继续 或 replan 换剩余步骤
+    end
+    R-->>P: finish 写入最终答案 结束
+```
+
+图 5-5：Plan-and-Execute 的时序展开。Planner 开头跑一次，之后是 Executor↔Replanner 成对循环；Replanner 是灵魂——它决定继续按计划、改计划还是收工。
+
 ## 什么时候该用 Plan-and-Execute
 
 我的经验阈值：

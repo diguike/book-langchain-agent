@@ -21,6 +21,25 @@ last_synced: "2026-05-25T02:41:44+08:00"
 
 代码全部基于 LangChain.js 1.x，Node.js 22+。
 
+这六件事叠加起来，一个生产级 Tool 内部的执行链路如图 4-2 所示：输入先过 schema 校验，再进入带超时和重试的请求层，HTTP 状态码按业务语义分类，最后无论成功还是失败都返回结构化结果——只有不可恢复的致命错误才抛异常打断 Agent。
+
+```mermaid
+flowchart TB
+    A[模型传入 args] --> B[Zod schema 校验]
+    B -->|非法| Z[抛异常 由 Agent 处理]
+    B -->|合法| C[发起请求 带超时]
+    C -->|超时或 5xx| D{是否可重试}
+    D -->|是 指数退避| C
+    D -->|否| E[返回结构化错误]
+    C -->|成功| F[按状态码分类]
+    F -->|业务错误 404/429| E
+    F -->|2xx| G[返回 success 结果]
+    E --> H[ToolMessage 回灌模型]
+    G --> H
+```
+
+图 4-2：生产级 Tool 的内部执行链路——校验、超时重试、结构化返回
+
 ## 异步 + 超时
 
 几乎所有真实场景的 Tool 都是异步的——API 调用、数据库查询、文件读写。我用 `AbortSignal.timeout()` 处理超时，比手写 `setTimeout` 干净得多：
@@ -79,7 +98,24 @@ const fetchUser = tool(
 
 ## 重试与降级
 
-外部 API 偶发抖动是常态。一个生产级 Tool 应该自己处理瞬时失败，不要把所有压力都推给模型。我会封装一个通用的 `httpRequest`：
+外部 API 偶发抖动是常态。一个生产级 Tool 应该自己处理瞬时失败，不要把所有压力都推给模型。重试的时间线如图 4-3 所示：每次失败后按指数退避等待（1 秒、2 秒……封顶 8 秒）再重试，最多 `maxRetries` 次，全部用尽才抛出最后一个错误。我会封装一个通用的 `httpRequest`：
+
+```mermaid
+sequenceDiagram
+    participant T as Tool
+    participant API as 外部 API
+    T->>API: 第 1 次请求
+    API-->>T: 503 或超时
+    Note over T: 退避 1 秒
+    T->>API: 第 2 次请求
+    API-->>T: 503 或超时
+    Note over T: 退避 2 秒
+    T->>API: 第 3 次请求
+    API-->>T: 200 成功
+    Note over T: 重试用尽仍失败则抛 lastError
+```
+
+图 4-3：指数退避重试的时间线（maxRetries=2，共尝试 3 次）
 
 ```typescript
 // http-client.ts

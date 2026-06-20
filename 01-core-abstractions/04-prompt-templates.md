@@ -53,6 +53,18 @@ console.log(messages);
 // ]
 ```
 
+`formatMessages` 把变量值填进模板，产出一个消息数组，这个数组正好是 Chat Model 的输入，如下图所示：
+
+```mermaid
+graph LR
+    V["变量值<br/>domain, style, question"] --> T["ChatPromptTemplate<br/>含占位符的模板"]
+    T --> F["formatMessages()"]
+    F --> MSG["消息数组<br/>SystemMessage + HumanMessage"]
+    MSG --> M["送入 Chat Model"]
+```
+
+图 4-1：模板变量填充到消息数组的流程。`{变量}` 被实际值替换，每条模板消息生成对应角色的消息对象。
+
 元组第一项是角色，对应 LangChain.js 的消息类：
 
 | 角色 | 对应类 | 含义 |

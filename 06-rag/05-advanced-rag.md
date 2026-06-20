@@ -414,7 +414,23 @@ Decomposition 跟 Multi-Query 的区别：Multi-Query 是同一个问题的同�
 
 ## 高级 RAG 组合管线示例
 
-把 HyDE + Hybrid + Rerank 三件套组合起来：
+把 HyDE + Hybrid + Rerank 三件套串成一条管线，数据流如图 6-1 所示：原 query 先经 HyDE 变成"假想答案"，用它同时驱动向量和 BM25 两路粗排，RRF 融合后交给 reranker 精排，最后才拼进 prompt 生成带引用的答案。
+
+```mermaid
+graph LR
+    Q[用户 query] --> H[HyDE<br/>LLM 生成假想答案]
+    H --> V[向量检索 top-15]
+    H --> B[BM25 检索 top-15]
+    V --> E[EnsembleRetriever<br/>RRF 融合]
+    B --> E
+    E --> R[Rerank<br/>cross-encoder 精排 top-5]
+    R --> P[拼 prompt + 编号]
+    P --> G[LLM 生成带引用答案]
+```
+
+图 6-1：HyDE + Hybrid + Rerank 组合管线的数据流向
+
+对应代码把这条链路拆成"构建检索器"和"HyDE 包装生成"两段：
 
 ```typescript
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";

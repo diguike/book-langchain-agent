@@ -164,7 +164,21 @@ await client.close();
 
 ## 同时连多个 Server
 
-`MultiServerMCPClient` 之所以叫 "Multi"，是因为它能并行连多个 Server，工具集自动汇总：
+`MultiServerMCPClient` 之所以叫 "Multi"，是因为它能并行连多个 Server，工具集自动汇总。它跟多个 Server 的连接拓扑如图 4-5 所示：本地 Server 走 stdio 子进程，远程 Server 走 HTTP，各自的工具被拉回后合并成一个数组，整体交给 `createAgent`，模型看到的是一个扁平的工具列表。
+
+```mermaid
+flowchart TB
+    AG[createAgent] --> CL[MultiServerMCPClient]
+    CL -->|stdio 子进程| FS[filesystem Server]
+    CL -->|stdio 子进程| GH[github Server]
+    CL -->|HTTP| BIZ[business Server 远程]
+    FS -->|read_file write_file| MERGE[合并后的工具数组]
+    GH -->|create_issue 等| MERGE
+    BIZ -->|业务工具| MERGE
+    MERGE --> AG
+```
+
+图 4-5：MultiServerMCPClient 同时连多个 MCP Server 的拓扑与工具汇总流
 
 ```typescript
 const client = new MultiServerMCPClient({

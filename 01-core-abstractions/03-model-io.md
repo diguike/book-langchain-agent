@@ -16,6 +16,18 @@ LangChain.js 只有一种模型抽象：`BaseChatModel`。输入是消息列表 
 
 任何主流 Provider 现在都走 Chat 接口（OpenAI 的纯 completion 接口早不更新了，Anthropic 一开始就没有过纯 completion）。多角色对话、工具调用、多模态都需要消息这个结构。
 
+模型的输入输出统一成「消息进、消息出」，如下图所示：
+
+```mermaid
+graph LR
+    IN["输入<br/>BaseMessageLike 数组<br/>system / user / ..."] --> M["BaseChatModel<br/>invoke / stream / batch"]
+    M --> OUT["输出<br/>AIMessage<br/>含 contentBlocks"]
+    OUT --> T[".text 纯文本"]
+    OUT --> CB[".contentBlocks 多模态/工具调用"]
+```
+
+图 3-1：Model I/O 的统一形态。无论哪个 Provider，输入都是消息列表，输出都是 `AIMessage`，纯文本读 `.text`，多模态读 `.contentBlocks`。
+
 接下来三个小节是三个 Provider 的接入，写得比较细，因为参数细节直接决定能不能跑通。
 
 ## 2. ChatOpenAI
@@ -245,7 +257,19 @@ Embeddings 模型对比：
 
 ## 8. 跨 Provider 的统一调用
 
-`BaseChatModel` 是所有 Provider 的共同基类。任何接受 `BaseChatModel` 的函数都能塞 OpenAI / Anthropic / Ollama 实例进去：
+`BaseChatModel` 是所有 Provider 的共同基类，业务代码只依赖这个基类，具体实例运行时再注入，如下图所示：
+
+```mermaid
+graph TB
+    APP["业务代码<br/>ask(model, question)"] --> BASE["BaseChatModel 抽象"]
+    BASE --> O["ChatOpenAI"]
+    BASE --> A["ChatAnthropic"]
+    BASE --> L["ChatOllama"]
+```
+
+图 3-2：跨 Provider 的统一调用。业务代码只面向 `BaseChatModel`，换模型只需换实例化的那一行，不动调用逻辑。
+
+任何接受 `BaseChatModel` 的函数都能塞 OpenAI / Anthropic / Ollama 实例进去：
 
 ```typescript
 import type { BaseChatModel } from "@langchain/core/language_models/chat_models";

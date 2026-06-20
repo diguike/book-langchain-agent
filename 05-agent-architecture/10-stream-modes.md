@@ -200,6 +200,24 @@ on_custom_event
 | 适用场景 | 聊天 UI、节点监控、SSE | 深度调试、复杂前端可视化 |
 | 性能 | 好 | 一般（事件多） |
 
+同样一次"模型生成 + 一次工具调用"的执行，两套 API 推出来的事件粒度差异如图 5-8 所示——`stream` 一个节点推一条（粗），`streamEvents` 把每个组件的开始/流式/结束都拆出来（细）。
+
+```mermaid
+sequenceDiagram
+    participant G as Agent 执行
+    participant S as stream(updates) 节点级
+    participant E as streamEvents(v2) 组件级
+    G->>S: model 节点完成 推 1 条
+    G->>E: on_chat_model_start
+    G->>E: on_chat_model_stream xN token
+    G->>E: on_chat_model_end
+    G->>S: tools 节点完成 推 1 条
+    G->>E: on_tool_start
+    G->>E: on_tool_end
+```
+
+图 5-8：`stream` 与 `streamEvents` 的事件粒度对比。同一段执行，`stream` 每个节点只推一条增量，`streamEvents` 把每个组件的生命周期事件全推出来——流量大但能做精细的前端可视化。
+
 **原则**：先用 `stream`，遇到 `stream` 拿不到的东西再上 `streamEvents`。生产环境的聊天 UI **99% 用 `stream({ streamMode: "messages" })`** 就够了。
 
 ## 几个常见陷阱

@@ -51,12 +51,21 @@ await agent.invoke({ messages: [{ role: "user", content: "我叫张三" }] }, co
 
 ## 手写 Summary middleware 的设计
 
-整体思路：
+整体思路如图 3-3 所示：超过阈值时把旧消息压缩成摘要，用一条 SystemMessage 替换它们，最近 N 条原始消息原样保留。
 
-1. `beforeModel` 钩子检查当前消息条数（或 token 数）
-2. 超过阈值时，取最早的 N 条交给一个轻量模型生成摘要
-3. 把那 N 条原始消息**从 state 中替换**为一条 system message（内容是摘要）
-4. 这个变化会写回 checkpoint，下次接着 trim
+```mermaid
+graph TD
+    A["beforeModel 钩子"] --> B{"消息数 ≥ 阈值?"}
+    B -->|否| Z["不动，直接调模型"]
+    B -->|是| C["切出最早的旧消息"]
+    C --> D["轻量模型压缩成摘要"]
+    D --> E["RemoveMessage 删旧消息"]
+    E --> F["注入摘要 SystemMessage"]
+    F --> G["摘要 + 最近 N 条原始消息"]
+    G --> H["调主模型 / 写回 checkpoint"]
+```
+
+<small>图 3-3：Summary middleware 的压缩流程。旧消息被摘要替换，近期消息保留全量</small>
 
 下面是一个完整可用的实现：
 

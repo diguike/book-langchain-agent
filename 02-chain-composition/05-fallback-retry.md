@@ -141,7 +141,24 @@ const robustParser = strictParser.withFallbacks([lenientParser]);
 
 ## 组合：先重试，再降级
 
-生产里最常用的模式：每个候选模型自己先重试几次，全失败了再换下一个。链式写就行：
+生产里最常用的模式：每个候选模型自己先重试几次，全失败了再换下一个。如图 2-6 所示，重试是每个候选内部的循环，降级是候选之间的横向切换，两者叠在一起构成生产级容错链。链式写就行：
+
+```mermaid
+graph TD
+    A["请求"] --> P1["primary 第 1 次"]
+    P1 -->|成功| OK["返回"]
+    P1 -->|失败| P2["primary 第 2 次"]
+    P2 -->|成功| OK
+    P2 -->|失败| P3["primary 第 3 次"]
+    P3 -->|成功| OK
+    P3 -->|全失败| S1["secondary 第 1 次"]
+    S1 -->|成功| OK
+    S1 -->|失败| S2["secondary 第 2 次"]
+    S2 -->|成功| OK
+    S2 -->|全失败| E["抛异常 / 兜底文案"]
+```
+
+<small>图 2-6：先重试再降级的执行流。每个候选内部 withRetry 重试，候选间 withFallbacks 切换</small>
 
 ```typescript
 import { ChatOpenAI } from "@langchain/openai";

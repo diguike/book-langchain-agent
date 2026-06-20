@@ -39,7 +39,17 @@ last_synced: "2026-06-20T20:35:22+08:00"
 }
 ```
 
-Output Parser 把"自由文本"和"结构化数据"两端缝合起来。
+Output Parser 把"自由文本"和"结构化数据"两端缝合起来，如下图所示：
+
+```mermaid
+graph LR
+    M["Chat Model<br/>AIMessage 自由文本"] --> P{"选择 Parser"}
+    P -->|纯文本| S["StringOutputParser<br/>→ string"]
+    P -->|松散 JSON| J["JsonOutputParser<br/>→ 任意对象 可流式"]
+    P -->|严格 schema| W["withStructuredOutput<br/>→ Zod 校验后的强类型对象"]
+```
+
+图 5-1：模型原始输出经 Parser 转成结构化数据。三条路对应三种严格程度，按下游需要的类型安全级别选。
 
 ## 2. StringOutputParser：最常用的
 
@@ -371,7 +381,23 @@ const results = await analysisChain.batch(
 
 ## 8. 选型建议
 
-我自己的判断流程：
+我自己的判断流程如下图所示：
+
+```mermaid
+graph TB
+    Q1{"只要纯字符串?"} -->|是| A1["StringOutputParser"]
+    Q1 -->|否| Q2{"Agent 整体输出<br/>按 schema?"}
+    Q2 -->|是| A2["createAgent<br/>responseFormat"]
+    Q2 -->|否| Q3{"模型支持<br/>工具调用?"}
+    Q3 -->|是| Q4{"需要严格<br/>schema 校验?"}
+    Q3 -->|否| A3["手写 prompt<br/>+ JsonOutputParser"]
+    Q4 -->|是| A4["withStructuredOutput<br/>functionCalling"]
+    Q4 -->|否| A5["JsonOutputParser<br/>可流式"]
+```
+
+图 5-2：Output Parser 选型决策树。从「要不要字符串」一路问到「模型支不支持工具调用」，落到具体方案。
+
+对照文字版：
 
 1. 链最后只要字符串？→ `StringOutputParser`
 2. 要 JSON、要流式渲染、字段松散？→ `JsonOutputParser`

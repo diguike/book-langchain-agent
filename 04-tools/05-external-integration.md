@@ -20,6 +20,22 @@ last_synced: "2026-06-20T20:08:16+08:00"
 
 这一节代码可以全部组合到一个真实的 Agent 上。
 
+一个生产 Agent 对接的外部系统通常不止一类，整体集成拓扑如图 4-6 所示：Agent 通过不同的 Tool 分别连向 REST API、数据库、SaaS 服务和文件系统，每条链路上挂着认证、限流、超时降级、安全护栏这些横切关注点。本节的五个模式正是给这些链路补齐这些能力。
+
+```mermaid
+flowchart TB
+    AG[Agent] --> RT[REST 工具]
+    AG --> DT[数据库工具]
+    AG --> ST[SaaS 工具]
+    AG --> FT[文件工具]
+    RT -->|认证 限流 重试| REST[REST API]
+    DT -->|只读连接 SQL 白名单| DB[(数据库)]
+    ST -->|Bearer/OAuth| SAAS[Slack 飞书 等]
+    FT -->|路径沙箱| FS[文件系统]
+```
+
+图 4-6：生产 Agent 与外部系统的集成拓扑——每条链路都挂着认证与安全护栏
+
 ## 1. REST (Representational State Transfer) 工厂模式
 
 REST 是最常见的集成对象。上一节我写了一个基础版的 `createRestTool`，这里扩展成生产级——支持认证、限流、超时、重试、降级：
@@ -707,7 +723,26 @@ class AdminActionTool extends StructuredTool {
 
 ## 7. 完整集成示例
 
-把上面这些模式组合到一个真实的 Agent 上——电商运营助手：
+把上面这些模式组合到一个真实的 Agent 上——电商运营助手。一次工具调用穿过这些防护层的数据流如图 4-7 所示：模型发起调用后，请求先过限流，再补认证头，进入带超时重试的请求层，失败时走降级，成功的结果才包成 ToolMessage 回灌模型。这些环节叠在同一条链路上，缺一层都可能在生产环境出事。
+
+```mermaid
+sequenceDiagram
+    participant M as 模型
+    participant L as 限流层
+    participant A as 认证层
+    participant R as 请求层 超时+重试
+    participant API as 外部 API
+    M->>L: tool_call
+    L-->>M: 超限则返回 RATE_LIMITED
+    L->>A: 通过则放行
+    A->>R: 注入 Bearer/API Key
+    R->>API: 发起请求
+    API-->>R: 响应或失败
+    R-->>M: 失败走 fallback 降级
+    R->>M: 成功结果包成 ToolMessage 回灌
+```
+
+图 4-7：一次工具调用穿过限流、认证、超时重试、降级各防护层的数据流
 
 ```typescript
 // integrated-agent.ts

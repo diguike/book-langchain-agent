@@ -136,7 +136,30 @@ console.log("\n===== 最终报告 =====\n");
 console.log(readFile(result.files, "final_report.md"));
 ```
 
-执行过程大致是：主 Agent 先 `write_todos` 列出"逐个框架调研 → 横向对比 → 写报告"的计划，然后三次 `task` 把三个框架分别派给 `research-agent`（每个子代理独立查资料、互不干扰），把结论写进 `notes-1/2/3.md`，最后读回所有笔记，综合成 `final_report.md`。
+执行过程大致是：主 Agent 先 `write_todos` 列出"逐个框架调研 → 横向对比 → 写报告"的计划，然后三次 `task` 把三个框架分别派给 `research-agent`（每个子代理独立查资料、互不干扰），把结论写进 `notes-1/2/3.md`，最后读回所有笔记，综合成 `final_report.md`。这条长链如图 9-5 所示，关键在于子代理的搜索原文留在它自己的上下文里，只有提炼结论回到主线，主 Agent 的上下文始终保持干净。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant M as 主调研 Agent
+    participant Sub as research 子代理
+    participant Web as 搜索工具
+    participant FS as 虚拟文件系统
+    U->>M: 对比三个 Agent 框架出报告
+    M->>M: write_todos 拆成子问题清单
+    loop 每个子问题
+        M->>Sub: task 派发单个子问题
+        Sub->>Web: 多轮 internet_search
+        Web-->>Sub: 原始资料留在子代理上下文
+        Sub-->>M: 仅回传提炼结论
+        M->>FS: write_file notes-n.md
+    end
+    M->>FS: 读回所有 notes 综合
+    M->>FS: write_file final_report.md
+    M-->>U: 返回 todos / files / 报告
+```
+
+> 图 9-5：深度调研 Agent 的长周期执行时序。子代理用独立上下文承接"脏活"（几千行搜索原文），主线只经虚拟文件系统交换提炼后的笔记，这是任务能扛到几十步而不爆上下文的核心。
 
 ## 几个工程要点
 

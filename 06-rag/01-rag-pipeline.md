@@ -27,7 +27,7 @@ last_synced: "2026-06-20T20:08:16+08:00"
 
 ## 完整管线的 7 个环节
 
-RAG 不是一个步骤，是一条流水线。离线阶段建索引，在线阶段做问答：
+RAG 不是一个步骤，是一条流水线。离线阶段建索引，在线阶段做问答，两阶段在向量库处汇合，如图 6-1 所示：
 
 ```mermaid
 graph LR
@@ -44,6 +44,8 @@ graph LR
         H --> I[Generate 生成]
     end
 ```
+
+图 6-1：RAG 完整管线——离线建索引与在线问答两阶段在向量库处汇合
 
 七个动词：Load → Split → Embed → Store → Retrieve → Augment → Generate。每一个都有独立的技术栈和坑：
 

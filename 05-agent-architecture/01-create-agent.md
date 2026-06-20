@@ -204,6 +204,20 @@ for await (const event of agent.streamEvents(
 
 `streamEvents` 比 `stream` 更细粒度，但事件流量大、过滤逻辑复杂，**不要轻易上**。生产环境优先用 `stream({ streamMode: "messages" })`。
 
+三种调用方式的差异如图 5-1 所示：同一个 Agent 内部跑的循环完全一样，区别只在"你拿到什么粒度的输出"。
+
+```mermaid
+graph LR
+    Agent[同一个 Agent 内部 model↔tools 循环] --> Invoke[invoke]
+    Agent --> Stream[stream]
+    Agent --> Events[streamEvents]
+    Invoke --> InvokeOut[只回最终 messages 一次性返回]
+    Stream --> StreamOut[按节点或 token 推增量 适合聊天 UI]
+    Events --> EventsOut[按组件推开始/chunk/结束 适合深度调试]
+```
+
+图 5-1：`invoke` / `stream` / `streamEvents` 三种调用方式输出粒度对比。从上到下粒度由粗到细，流量与上手成本同步上升。
+
 ## 一个常见的踩坑：工具不被调用
 
 新手最容易遇到的问题是模型完全不调你的工具，直接回答了：

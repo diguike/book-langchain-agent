@@ -10,7 +10,20 @@ last_synced: "2026-06-20T20:35:22+08:00"
 
 我做内容平台时遇到的需求：每篇用户发的帖子需要同时跑三件事——摘要、关键词、情感分析。串行实现要 3 次 LLM 等待，10 万篇 / 天的话光是等模型就把吞吐压死了。
 
-三步之间没有任何依赖关系，完全可以并发。`RunnableParallel` 就是 LCEL 里干这件事的原语：同一个输入广播给多个分支，所有分支并发跑，最后把结果按 key 合成一个对象返回。
+三步之间没有任何依赖关系，完全可以并发。`RunnableParallel` 就是 LCEL 里干这件事的原语：同一个输入广播给多个分支，所有分支并发跑，最后把结果按 key 合成一个对象返回。如图 2-2 所示，这是一个 fan-out / fan-in 结构：输入扇出到各分支，各分支结果再扇入合并。
+
+```mermaid
+graph LR
+    IN["输入<br/>text"] --> S["summary 分支"]
+    IN --> K["keywords 分支"]
+    IN --> E["sentiment 分支"]
+    S --> M["合并为对象<br/>按 key 收集"]
+    K --> M
+    E --> M
+    M --> OUT["输出<br/>summary, keywords, sentiment"]
+```
+
+<small>图 2-2：RunnableParallel 的 fan-out / fan-in 结构，三个分支接收同一输入并发执行，结果按 key 合并</small>
 
 ## 两种构造方式
 

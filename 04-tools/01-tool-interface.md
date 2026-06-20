@@ -16,6 +16,26 @@ Tool 是 Agent 的动作集合。模型只能输出文本，没法直接查数�
 
 我在写这一章时一直在提醒自己一件事：Tool 的好坏决定 Agent 的好坏。模型再聪明，给的工具描述模糊、schema 不严，照样选错、传错参数。
 
+一个 Tool 从"被模型选中"到"结果回灌给模型"要走完一整条链路，如图 4-1 所示：模型读 description 和 schema 决定调用、`createAgent` 用 schema 校验并执行函数、结果包成 ToolMessage 重新喂给模型整合答案。后面几节的所有细节都挂在这条链路上。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant M as 模型
+    participant A as createAgent
+    participant T as Tool 执行函数
+    U->>M: 提问
+    M->>M: 读 description 与 schema 决定是否调用
+    M->>A: 返回 tool_calls（name + args）
+    A->>A: 用 Zod schema 校验 args
+    A->>T: 调用执行函数
+    T-->>A: 返回 string 或 content+artifact
+    A->>M: 包成 ToolMessage 回灌
+    M->>U: 整合工具结果生成最终答案
+```
+
+图 4-1：Tool 调用的完整时序——从模型决策到 ToolMessage 回灌
+
 > 官方参考：[LangChain Tools 文档](https://docs.langchain.com/oss/javascript/integrations/tools/)、[Zod schema 库](https://zod.dev/)
 
 ## 第一个 Tool：30 行代码

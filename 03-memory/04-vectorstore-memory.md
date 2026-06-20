@@ -22,6 +22,27 @@ last_synced: "2026-06-20T20:08:16+08:00"
 2. **可解释**：Agent 调了哪条工具、检索了什么 query、返回了什么内容，整个过程在 trace 里看得清清楚楚
 3. **可控**：你可以给同一个 Agent 配多个"记忆 tool"（短期、长期、特定领域），让它自己选
 
+如图 3-4 所示，"记忆即工具"的链路是：模型先判断要不要回忆，需要时才发起对向量库的语义检索，把命中片段当作工具结果喂回去再生成答案。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant A as Agent (模型)
+    participant T as recall_memory 工具
+    participant V as 向量库
+    U->>A: 提问
+    A->>A: 判断是否需要回忆
+    alt 需要历史信息
+        A->>T: 调用 recall_memory(query)
+        T->>V: similaritySearch(query, k)
+        V-->>T: 相关片段
+        T-->>A: 检索结果
+    end
+    A-->>U: 整合后回答
+```
+
+<small>图 3-4：记忆即工具的检索流。模型自主决定是否检索，向量库返回语义相关片段</small>
+
 ## 把"回忆"做成一个工具
 
 最小可用版本，用内存向量库 + Anthropic Claude：

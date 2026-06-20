@@ -363,6 +363,30 @@ export const codeAgent = createAgent({
 });
 ```
 
+这套工具 + middleware 串起来后，一次"改代码 + 验证 + 提交"的完整回合如图 9-2 所示：模型先读文件弄清现状，再发 `file_edit`，autoCommit middleware 在工具执行后顺手把改动提交进 git，最后模型跑一遍测试确认没改坏。
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant M as Claude Opus
+    participant T as 工具层
+    participant MW as autoCommit
+    participant G as git / workspace
+    U->>M: 改 math.ts 加 average 函数
+    M->>T: file_read 看现状
+    T-->>M: 当前文件内容
+    M->>T: file_edit 写入改动
+    T->>G: 写文件
+    T->>MW: 工具执行完成
+    MW->>G: git add + commit
+    M->>T: shell_exec npx vitest
+    T->>G: 跑测试
+    T-->>M: 测试通过
+    M-->>U: 完成并已提交
+```
+
+> 图 9-2：一次代码修改回合的时序。autoCommit middleware 在 `file_edit` 执行后自动 `git commit`（对应 `src/middleware/auto-commit.ts` 的 `wrapToolCall`），给每一步留下可回滚的 checkpoint。
+
 ## CLI 终端 UI（流式）
 
 ```typescript

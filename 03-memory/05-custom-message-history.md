@@ -26,7 +26,25 @@ last_synced: "2026-06-20T20:08:16+08:00"
 
 ## `BaseCheckpointSaver` 接口
 
-LangGraph 把"按 thread_id 持久化状态"抽象成了 `BaseCheckpointSaver`，源码在 `@langchain/langgraph-checkpoint`。要自定义 checkpointer，实现五个抽象方法（`getTuple` / `list` / `put` / `putWrites` / `deleteThread`）：
+LangGraph 把"按 thread_id 持久化状态"抽象成了 `BaseCheckpointSaver`，源码在 `@langchain/langgraph-checkpoint`。要自定义 checkpointer，实现五个抽象方法（`getTuple` / `list` / `put` / `putWrites` / `deleteThread`）。如图 3-5 所示，LangGraph 在一次 invoke 中分别用 `getTuple` 读、`put` / `putWrites` 写，你的后端只要把这几个方法对接到自己的存储即可。
+
+```mermaid
+sequenceDiagram
+    participant LG as LangGraph 运行时
+    participant CK as 自定义 Checkpointer
+    participant DB as 后端存储(Redis 等)
+    LG->>CK: getTuple(config) 读最新 checkpoint
+    CK->>DB: 按 thread_id + checkpoint_id 取
+    DB-->>CK: 序列化数据
+    CK-->>LG: CheckpointTuple
+    Note over LG: 执行图节点
+    LG->>CK: putWrites 保存中间 pending writes
+    CK->>DB: 写 writes
+    LG->>CK: put(checkpoint) 落盘新快照
+    CK->>DB: 写 checkpoint + 更新 latest 索引
+```
+
+<small>图 3-5：自定义 checkpointer 的读写时序。LangGraph 调标准接口，你负责把它落到具体后端</small>
 
 ```typescript
 import { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";

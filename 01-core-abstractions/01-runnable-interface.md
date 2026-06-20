@@ -35,6 +35,21 @@ console.log(answer);
 
 这里出现了四个对象：`prompt` / `model` / `parser` / `chain`。它们都实现了 `Runnable<RunInput, RunOutput>`。`.pipe()` 把前一个的输出类型对接到后一个的输入类型，TypeScript 在编译期就帮你查对不上。
 
+不同组件之所以能用同一个 `.pipe()` 串起来，是因为它们都收敛到同一个接口，如下图所示：
+
+```mermaid
+graph TB
+    R["Runnable 接口<br/>invoke / batch / stream / pipe"]
+    R --> P["ChatPromptTemplate"]
+    R --> M["ChatModel"]
+    R --> O["OutputParser"]
+    R --> RT["Retriever"]
+    R --> A["createAgent 返回的 Agent"]
+    R --> C["pipe 组合出的 Chain"]
+```
+
+图 1-1：Runnable 是所有核心组件的统一抽象。正因为大家都实现同一套调用约定，才能被 `.pipe()` 自由串联。
+
 完整的 Runnable 接口大致长这样：
 
 ```typescript
@@ -58,6 +73,22 @@ interface Runnable<RunInput, RunOutput> {
 接下来逐个讲。
 
 ## 2. 四种调用方式
+
+四种调用方式针对不同的数据形态，下图对比它们的返回方式：
+
+```mermaid
+graph LR
+    subgraph 输入
+        I1["单个输入"]
+        I2["输入数组"]
+    end
+    I1 --> INV["invoke"] --> R1["一次性返回完整结果"]
+    I1 --> STR["stream"] --> R2["逐 chunk 增量返回"]
+    I1 --> EVT["streamEvents"] --> R3["每个节点的<br/>开始/结束/片段事件"]
+    I2 --> BAT["batch"] --> R4["并发执行<br/>返回结果数组"]
+```
+
+图 1-2：四种调用方式的数据流对比。`invoke` 等全部完成，`stream` 边算边吐，`batch` 吃数组并发跑，`streamEvents` 暴露链内每个节点的事件。
 
 ### invoke：一发一收
 
