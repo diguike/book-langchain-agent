@@ -1,0 +1,9 @@
+{
+  "name": "mock-llm-server",
+  "private": true,
+  "type": "module",
+  "description": "OpenAI Chat Completions 兼容的 Mock LLM 服务，后端接本地 Claude Code CLI",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
