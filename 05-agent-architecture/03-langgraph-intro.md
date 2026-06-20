@@ -352,7 +352,7 @@ await app.invoke(input, {
 
 ## 流式
 
-LangGraph 的 `stream()` 支持 5 种 mode：`values`、`updates`、`messages`、`debug`、`custom`。最常用的两个：
+LangGraph 的 `stream()` 支持多种 mode，最常用的是 `values`、`updates`、`messages`、`debug`、`custom`（完整 8 种见下文链接）。最常用的两个：
 
 ```typescript
 // 节点级增量，调试首选
@@ -368,7 +368,7 @@ for await (const [chunk, meta] of app.stream(input, { streamMode: "messages" }))
 }
 ```
 
-完整的 5 种 mode + SSE 集成 + 各种坑见 [流式输出深入](./10-stream-modes.md)，这里不展开。
+完整的 8 种 mode + SSE 集成 + 各种坑见 [流式输出深入](./10-stream-modes.md)，这里不展开。
 
 ## `createAgent` vs 手写 graph
 

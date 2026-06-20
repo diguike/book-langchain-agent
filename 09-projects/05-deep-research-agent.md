@@ -60,6 +60,10 @@ const tavily = new TavilySearch({
 const internetSearch = tool(
   async ({ query }) => {
     const resp = await tavily.invoke({ query });
+    // TavilySearch 失败时返回 { error }，不会有 results，先挡一道
+    if (typeof resp === "object" && resp && "error" in resp) {
+      return `搜索失败：${(resp as any).error}`;
+    }
     return resp.results.map((r) => `【${r.title}】${r.content}\n${r.url}`).join("\n\n");
   },
   {
@@ -114,11 +118,22 @@ const result = await agent.invoke(
   { recursionLimit: 1000 } // Deep Agent 步数多，上限给大
 );
 
+// result.files 是 Record<string, FileData>，FileData.content 是 string[]（v1）
+// 或 string | Uint8Array（v2），直接打印会变成 [object]，统一用 helper 取文本
+function readFile(files: Record<string, any> | undefined, name: string): string {
+  const f = files?.[name];
+  if (!f) return "(未生成)";
+  const c = f.content;
+  if (Array.isArray(c)) return c.join("\n");
+  if (typeof c === "string") return c;
+  return new TextDecoder().decode(c);
+}
+
 // 内置 middleware 把规划和文件状态注入了返回值
 console.log("规划清单：", result.todos);
 console.log("产出文件：", Object.keys(result.files ?? {}));
 console.log("\n===== 最终报告 =====\n");
-console.log(result.files?.["final_report.md"]);
+console.log(readFile(result.files, "final_report.md"));
 ```
 
 执行过程大致是：主 Agent 先 `write_todos` 列出"逐个框架调研 → 横向对比 → 写报告"的计划，然后三次 `task` 把三个框架分别派给 `research-agent`（每个子代理独立查资料、互不干扰），把结论写进 `notes-1/2/3.md`，最后读回所有笔记，综合成 `final_report.md`。

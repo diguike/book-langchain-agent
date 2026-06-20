@@ -93,7 +93,7 @@ import {
   Command,
 } from "@langchain/langgraph";
 import { MemorySaver } from "@langchain/langgraph";
-import { createAgent, toolStrategy } from "langchain";
+import { createAgent } from "langchain";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { z } from "zod";
 import type { WorkflowConfig } from "./types.js";
@@ -141,7 +141,8 @@ export function compileWorkflow(config: WorkflowConfig) {
 
   const supervisorModel = parseModel(config.supervisor.model);
   const supervisorStructured = supervisorModel.withStructuredOutput(
-    toolStrategy(DecisionSchema)
+    DecisionSchema,
+    { method: "functionCalling" }
   );
 
   // 3. Supervisor 节点
@@ -524,7 +525,7 @@ event: done
 
 读者拿这个骨架去支撑自己的业务，往往只需要：写新工具注册到 registry、加新 YAML。不用碰编译器，也不用碰 LangGraph 的拓扑构造。
 
-这是模块 09 最后一个综合项目。合上书之前，建议把这 4 个项目本地都跑一遍——它们覆盖了本书 80% 的核心知识点：`createAgent`、Middleware、LangGraph、HITL、Streaming、Multi-Agent、动态编排。
+建议把这 5 个项目本地都跑一遍——它们覆盖了本书 80% 的核心知识点：`createAgent`、Middleware、LangGraph、HITL、Streaming、Multi-Agent、动态编排。下一节[深度调研 Agent](./05-deep-research-agent.md) 用 Deep Agents 把这套能力推到长周期任务，给模块 09 收尾。
 
 ---
 

@@ -120,7 +120,7 @@ Swarm 灵活，但代价是可预测性差。最典型的故障是**死循环 ha
 
 `@langchain/langgraph-swarm` 的 `createSwarm` 实现去中心化的多 Agent：专家之间用 `createHandoffTool` 直接转交，控制权靠状态字段 `activeAgent` 传递。三个必须：必须指定 `defaultActiveAgent`、必须 `.compile()`、**必须配 checkpointer + `thread_id`**（否则 `activeAgent` 跨轮丢失）。自定义 `stateSchema` 必须带 `activeAgent` 键。主要风险是 handoff 死循环，靠清晰的 prompt 边界 + 链长监控 + `recursionLimit` 防御。选型上默认 Supervisor，Swarm 留给真正需要自由转交的场景。
 
-到这里 Agent 架构的核心模式就齐了：从 [单 Agent](./01-create-agent.md) 到 [Deep Agent](./11-deep-agents.md)，从中心化的 [Supervisor](./13-supervisor.md) 到去中心化的 Swarm。下一节 [Human-in-the-Loop](./09-human-in-the-loop.md) 给这些 Agent 加上人工审批断点。
+到这里 Agent 架构的核心模式就齐了：从 [单 Agent](./01-create-agent.md) 到 [Deep Agent](./11-deep-agents.md)，从中心化的 [Supervisor](./13-supervisor.md) 到去中心化的 Swarm。模块 05 至此收尾。下一步进入 [下一模块 RAG 基础管线](../06-rag/01-rag-pipeline.md)，把外部知识库接入 Agent。
 
 ---
 

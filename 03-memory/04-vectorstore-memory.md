@@ -30,7 +30,7 @@ last_synced: "2026-05-25T02:41:29+08:00"
 // memory-tool.ts
 import { createAgent } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Document } from "@langchain/core/documents";
 import { tool } from "@langchain/core/tools";

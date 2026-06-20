@@ -317,7 +317,6 @@ Supervisor 不直接调任何业务工具，它只决定"这条消息该走哪�
 ```typescript
 // src/agents/supervisor.ts
 import { ChatAnthropic } from "@langchain/anthropic";
-import { toolStrategy } from "langchain";
 import { z } from "zod";
 
 const RouteSchema = z.object({
@@ -332,9 +331,9 @@ const supervisorModel = new ChatAnthropic({
   temperature: 0,
 });
 
-const structured = supervisorModel.withStructuredOutput(
-  toolStrategy(RouteSchema)
-);
+const structured = supervisorModel.withStructuredOutput(RouteSchema, {
+  method: "functionCalling",
+});
 
 export async function route(messages: Array<{ role: string; content: string }>) {
   const result = await structured.invoke([

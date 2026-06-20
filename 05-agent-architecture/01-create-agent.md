@@ -187,7 +187,7 @@ for await (const chunk of agent.stream(
 }
 ```
 
-`streamMode` 有 5 个值：`values` / `updates` / `messages` / `debug` / `custom`，详见 [流式输出深入](./10-stream-modes.md)。日常聊天 UI 用 `messages` 拿 token-by-token 流，调试用 `updates` 拿节点级日志。
+`streamMode` 有多个值，常用的是 `values` / `updates` / `messages` / `debug` / `custom`，完整 8 种详见 [流式输出深入](./10-stream-modes.md)。日常聊天 UI 用 `messages` 拿 token-by-token 流，调试用 `updates` 拿节点级日志。
 
 ### 3. `streamEvents`：拿到模型 token + 工具调用 + 自定义事件全套
 

@@ -332,7 +332,7 @@ npm ls @langchain/core
 | 每次请求 `new ChatAnthropic({ ... })` | 模块顶层创建并复用 |
 | 把整篇文档塞进 prompt | 走 RAG 检索相关片段 |
 | 用 `MemoryVectorStore` 上线 | 生产用 PGVector / Pinecone / Qdrant |
-| 手写 JSON 解析 | 用 `model.withStructuredOutput(toolStrategy(schema))` |
+| 手写 JSON 解析 | 用 `model.withStructuredOutput(schema, { method: "functionCalling" })` |
 | 把 `thread_id` 写死 | 按 `userId:conversationId` 维度生成 |
 | 在 `createAgent` 之前先 `.bindTools()` | 直接把 `tools` 数组交给 `createAgent` |
 

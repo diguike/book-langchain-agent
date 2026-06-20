@@ -514,7 +514,7 @@ async function badNode(state: ...) {
 
 Human-in-the-Loop 用 `interrupt()` 在节点内暂停 graph、用 `Command({ resume })` 喂回人决策。`createAgent` 通过 `humanInTheLoopMiddleware({ interruptOn })` 声明式配置（注意它**没有** `interrupts` 参数），手写 graph 时用动态 `interrupt()`。配合 checkpointer 可以做到跨进程长时间暂停。手写 graph 里修改决策走"相同 message id 替换"的技巧。
 
-至此模块 05 的核心架构全部讲完——`createAgent` 基础、ReAct 循环、Plan-and-Execute、Self-Reflection、Multi-Agent、HITL、LangGraph 底层、State 与 Checkpointer、Middleware 系统、流式输出。下一步进入 [模块 06：RAG](../06-rag/)，把外部知识接入 Agent。
+下一节 [流式输出深入 Stream Modes](./10-stream-modes.md) 换个视角：把这些 Agent 的执行过程实时推给前端。
 
 ---
 

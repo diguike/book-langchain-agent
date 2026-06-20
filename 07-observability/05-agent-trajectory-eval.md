@@ -128,7 +128,7 @@ await evaluate(
 
 Agent 评估不能只看最终答案，要看**轨迹**——调了哪些工具、什么顺序、参数对不对。`agentevals`（JS 版已可用，注意还是早期 `0.0.x`）给两条路径：`createTrajectoryMatchEvaluator` 做确定性规则匹配（strict / unordered / subset / superset 四种模式，零成本），`createTrajectoryLLMAsJudge` 做 LLM 评判（无标准轨迹也能评，但花 token）。两者都能接进 LangSmith `evaluate()` 和 CI，把轨迹回归变成持续防线。前面那种"答案蒙对、路径出错"的隐患，只有轨迹评估能逮住。
 
-下一节回到 [Prompt 工程优化](./04-prompt-engineering.md)，评估给的是"哪里不对"，prompt 迭代是"怎么改对"——两者构成 Agent 质量的闭环。
+可观测性与评估到这里就齐了：从 Tracing 看清执行、到答案评估、再到轨迹评估逮住"答案蒙对、路径出错"的隐患。下一步进入 [下一模块 生产部署](../08-production/01-api-server.md)，把验证过的 Agent 真正搬上线。
 
 ---
 

@@ -10,7 +10,7 @@ last_synced: "2026-05-25T02:40:19+08:00"
 
 把 Agent 包成一个 HTTP 接口、做一个 ChatGPT 一样的实时打字效果，绕不开 LangGraph 的流式 API。这一节会拆透两套 API：
 
-- `graph.stream(input, options)`：节点级流式，5 种 stream mode
+- `graph.stream(input, options)`：节点级流式，8 种 stream mode
 - `graph.streamEvents(input, options)`：事件级流式，token 级别推送
 
 `createAgent` 返回的 Agent 也是一个 graph，所以本节方法对它同样适用。
@@ -317,9 +317,9 @@ es.onmessage = (e) => {
 
 ## 小结
 
-LangGraph 的流式 API 分两层：`stream()` 用 5 种 mode 推节点级或 token 级数据，`streamEvents()` 推组件级事件。聊天 UI 默认用 `stream({ streamMode: "messages", encoding: "text/event-stream" })`，调试用 `streamMode: "updates"`，业务埋点用 `dispatchCustomEvent + streamMode: "custom"`。
+LangGraph 的流式 API 分两层：`stream()` 用 8 种 mode 推节点级或 token 级数据，`streamEvents()` 推组件级事件。聊天 UI 默认用 `stream({ streamMode: "messages", encoding: "text/event-stream" })`，调试用 `streamMode: "updates"`，业务埋点用 `dispatchCustomEvent + streamMode: "custom"`。
 
-模块 05 就此结束。下一步是 [模块 06：RAG](../06-rag/01-rag-pipeline.md)，把外部知识库接入 Agent。
+下一节 [Deep Agents](./11-deep-agents.md) 进入更复杂的 Agent 形态：规划、子代理、虚拟文件系统，专门对付长周期任务。
 
 ---
 

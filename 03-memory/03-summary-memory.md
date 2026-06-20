@@ -69,6 +69,7 @@ import {
   SystemMessage,
   RemoveMessage,
 } from "@langchain/core/messages";
+import { z } from "zod";
 
 const summarizer = new ChatAnthropic({
   model: "claude-haiku-4-5", // 摘要用便宜模型
@@ -106,10 +107,8 @@ ${dialog}
 
 export const summaryMiddleware = createMiddleware({
   name: "summary",
-  stateSchema: {
-    // 把"当前摘要"作为自定义 state 字段
-    summary: { value: (a: string, b: string) => b ?? a, default: () => "" },
-  },
+  // 把"当前摘要"作为自定义 state 字段
+  stateSchema: z.object({ summary: z.string().default("") }),
   beforeModel: async (state) => {
     const messages = state.messages as BaseMessage[];
     if (messages.length < TRIGGER_AT) return;
@@ -270,6 +269,7 @@ import {
   SystemMessage,
   RemoveMessage,
 } from "@langchain/core/messages";
+import { z } from "zod";
 
 const summarizer = new ChatAnthropic({ model: "claude-haiku-4-5", temperature: 0 });
 
@@ -300,9 +300,7 @@ ${dialog}`
 
 const summaryMw = createMiddleware({
   name: "summary",
-  stateSchema: {
-    summary: { value: (a: string, b: string) => b ?? a, default: () => "" },
-  },
+  stateSchema: z.object({ summary: z.string().default("") }),
   beforeModel: async (state) => {
     const msgs = state.messages as BaseMessage[];
     if (msgs.length < TRIGGER) return;

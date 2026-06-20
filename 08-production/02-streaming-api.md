@@ -8,7 +8,7 @@ last_synced: "2026-05-25T02:43:10+08:00"
 
 ## 这一节讲什么、不讲什么
 
-[流式输出深入](../05-agent-architecture/10-stream-modes.md) 讲了 `stream()` 和 `streamEvents()` 这两个 API 怎么用、5 种 stream mode 各推什么数据。那一节是"API 视角"。
+[流式输出深入](../05-agent-architecture/10-stream-modes.md) 讲了 `stream()` 和 `streamEvents()` 这两个 API 怎么用、各种 stream mode 各推什么数据。那一节是"API 视角"。
 
 这一节是"部署视角"——同样的 `stream({ streamMode: "messages", encoding: "text/event-stream" })`，扔到生产环境后面对的是另一套问题：
 

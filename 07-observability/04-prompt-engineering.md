@@ -127,7 +127,7 @@ const fewShot = ChatPromptTemplate.fromMessages([
 ```typescript
 import { SemanticSimilarityExampleSelector } from "@langchain/core/example_selectors";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 
 const allExamples = [
   { input: "...", output: "..." },
