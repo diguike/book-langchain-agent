@@ -1,7 +1,7 @@
 ---
-title: Self-Reflection
+title: Self-Reflection 自我反思模式
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/UmdpwFEtPiU7Q7kP6LGcOMmCnMf"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T20:35:22+08:00"
 ---
 
 > 模块 05 - Agent 架构 | 前置知识：[LangGraph 入门](./03-langgraph-intro.md)

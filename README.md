@@ -16,8 +16,8 @@
 **第一部分 · 基础**
 
 - 00 导论：[前言](./00-introduction/00-preface.md) · [课程路线图](./00-introduction/01-roadmap.md) · [前置知识清单](./00-introduction/02-prerequisites.md) · [环境搭建指南](./00-introduction/03-setup.md)
-- 01 核心抽象：[Runnable 接口](./01-core-abstractions/01-runnable-interface.md) · [LCEL](./01-core-abstractions/02-lcel.md) · [Model I/O](./01-core-abstractions/03-model-io.md) · [Prompt Templates](./01-core-abstractions/04-prompt-templates.md) · [Output Parsers](./01-core-abstractions/05-output-parsers.md)
-- 02 Chain 组合：[RunnableSequence](./02-chain-composition/01-runnable-sequence.md) · [RunnableParallel](./02-chain-composition/02-runnable-parallel.md) · [RunnableBranch](./02-chain-composition/03-runnable-branch.md) · [Streaming](./02-chain-composition/04-streaming.md) · [Fallback 与重试](./02-chain-composition/05-fallback-retry.md) · [LCEL vs LangGraph](./02-chain-composition/06-lcel-vs-langgraph.md)
+- 01 核心抽象：[Runnable 接口](./01-core-abstractions/01-runnable-interface.md) · [LCEL](./01-core-abstractions/02-lcel.md) · [Model I/O 模型输入输出](./01-core-abstractions/03-model-io.md) · [Prompt Templates 提示词模板](./01-core-abstractions/04-prompt-templates.md) · [Output Parsers 输出解析器](./01-core-abstractions/05-output-parsers.md)
+- 02 Chain 组合：[RunnableSequence 顺序链](./02-chain-composition/01-runnable-sequence.md) · [RunnableParallel 并行链](./02-chain-composition/02-runnable-parallel.md) · [RunnableBranch 条件分支](./02-chain-composition/03-runnable-branch.md) · [Streaming](./02-chain-composition/04-streaming.md) · [Fallback 与重试](./02-chain-composition/05-fallback-retry.md) · [LCEL vs LangGraph](./02-chain-composition/06-lcel-vs-langgraph.md)
 
 **第二部分 · 记忆与工具**
 
@@ -26,11 +26,11 @@
 
 **第三部分 · Agent 架构（核心）**
 
-- 05 Agent 架构：[createAgent 入门](./05-agent-architecture/01-create-agent.md) · [ReAct 模式](./05-agent-architecture/02-react-pattern.md) · [LangGraph 入门](./05-agent-architecture/03-langgraph-intro.md) · [State 与 Checkpointer](./05-agent-architecture/04-langgraph-state.md) · [Plan and Execute](./05-agent-architecture/05-plan-and-execute.md) · [Self-Reflection](./05-agent-architecture/06-self-reflection.md) · [Middleware 系统](./05-agent-architecture/07-middleware.md) · [Multi-Agent 协作](./05-agent-architecture/08-multi-agent.md) · [Human-in-the-Loop](./05-agent-architecture/09-human-in-the-loop.md) · [Stream Modes](./05-agent-architecture/10-stream-modes.md) · [Deep Agents](./05-agent-architecture/11-deep-agents.md) · [内置 Middleware 全景](./05-agent-architecture/12-middleware-builtin.md) · [Supervisor](./05-agent-architecture/13-supervisor.md) · [Swarm](./05-agent-architecture/14-swarm.md)
+- 05 Agent 架构：[createAgent 入门](./05-agent-architecture/01-create-agent.md) · [ReAct 模式](./05-agent-architecture/02-react-pattern.md) · [LangGraph 入门](./05-agent-architecture/03-langgraph-intro.md) · [State 与 Checkpointer](./05-agent-architecture/04-langgraph-state.md) · [Plan and Execute 规划-执行模式](./05-agent-architecture/05-plan-and-execute.md) · [Self-Reflection 自我反思模式](./05-agent-architecture/06-self-reflection.md) · [Middleware 系统](./05-agent-architecture/07-middleware.md) · [Multi-Agent 协作](./05-agent-architecture/08-multi-agent.md) · [Human-in-the-Loop](./05-agent-architecture/09-human-in-the-loop.md) · [Stream Modes](./05-agent-architecture/10-stream-modes.md) · [Deep Agents](./05-agent-architecture/11-deep-agents.md) · [内置 Middleware 全景](./05-agent-architecture/12-middleware-builtin.md) · [Supervisor](./05-agent-architecture/13-supervisor.md) · [Swarm](./05-agent-architecture/14-swarm.md)
 
 **第四部分 · RAG 与可观测性**
 
-- 06 RAG：[基础管线](./06-rag/01-rag-pipeline.md) · [Document Loaders](./06-rag/02-document-loaders.md) · [Text Splitters](./06-rag/03-text-splitters.md) · [Retriever 策略](./06-rag/04-retrievers.md) · [高级 RAG](./06-rag/05-advanced-rag.md) · [RAG Agent](./06-rag/06-rag-agent.md)
+- 06 RAG：[基础管线](./06-rag/01-rag-pipeline.md) · [Document Loaders 文档加载器](./06-rag/02-document-loaders.md) · [Text Splitters 文本切分](./06-rag/03-text-splitters.md) · [Retriever 策略](./06-rag/04-retrievers.md) · [高级 RAG](./06-rag/05-advanced-rag.md) · [RAG Agent](./06-rag/06-rag-agent.md)
 - 07 可观测性与评估：[Callback 系统](./07-observability/01-callbacks.md) · [LangSmith Tracing](./07-observability/02-langsmith-tracing.md) · [评估方法与指标](./07-observability/03-evaluation.md) · [Prompt 工程优化](./07-observability/04-prompt-engineering.md) · [Agent 轨迹评估](./07-observability/05-agent-trajectory-eval.md)
 
 **第五部分 · 生产与项目**

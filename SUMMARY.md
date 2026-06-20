@@ -11,15 +11,15 @@
 
 - [Runnable 接口详解](./01-core-abstractions/01-runnable-interface.md)
 - [LCEL 表达式语言](./01-core-abstractions/02-lcel.md)
-- [Model I/O](./01-core-abstractions/03-model-io.md)
-- [Prompt Templates](./01-core-abstractions/04-prompt-templates.md)
-- [Output Parsers](./01-core-abstractions/05-output-parsers.md)
+- [Model I/O 模型输入输出](./01-core-abstractions/03-model-io.md)
+- [Prompt Templates 提示词模板](./01-core-abstractions/04-prompt-templates.md)
+- [Output Parsers 输出解析器](./01-core-abstractions/05-output-parsers.md)
 
 ## 02 Chain 组合
 
-- [RunnableSequence](./02-chain-composition/01-runnable-sequence.md)
-- [RunnableParallel](./02-chain-composition/02-runnable-parallel.md)
-- [RunnableBranch](./02-chain-composition/03-runnable-branch.md)
+- [RunnableSequence 顺序链](./02-chain-composition/01-runnable-sequence.md)
+- [RunnableParallel 并行链](./02-chain-composition/02-runnable-parallel.md)
+- [RunnableBranch 条件分支](./02-chain-composition/03-runnable-branch.md)
 - [Streaming 流式输出](./02-chain-composition/04-streaming.md)
 - [Fallback 与重试](./02-chain-composition/05-fallback-retry.md)
 - [LCEL vs LangGraph 决策指南](./02-chain-composition/06-lcel-vs-langgraph.md)
@@ -48,8 +48,8 @@
 - [ReAct 模式](./05-agent-architecture/02-react-pattern.md)
 - [LangGraph 入门](./05-agent-architecture/03-langgraph-intro.md)
 - [LangGraph State 与 Checkpointer](./05-agent-architecture/04-langgraph-state.md)
-- [Plan and Execute](./05-agent-architecture/05-plan-and-execute.md)
-- [Self-Reflection](./05-agent-architecture/06-self-reflection.md)
+- [Plan and Execute 规划-执行模式](./05-agent-architecture/05-plan-and-execute.md)
+- [Self-Reflection 自我反思模式](./05-agent-architecture/06-self-reflection.md)
 - [Middleware 系统](./05-agent-architecture/07-middleware.md)
 - [Multi-Agent 协作](./05-agent-architecture/08-multi-agent.md)
 - [Human-in-the-Loop 与 typed interrupt](./05-agent-architecture/09-human-in-the-loop.md)
@@ -62,8 +62,8 @@
 ## 06 RAG
 
 - [RAG 基础管线](./06-rag/01-rag-pipeline.md)
-- [Document Loaders](./06-rag/02-document-loaders.md)
-- [Text Splitters](./06-rag/03-text-splitters.md)
+- [Document Loaders 文档加载器](./06-rag/02-document-loaders.md)
+- [Text Splitters 文本切分](./06-rag/03-text-splitters.md)
 - [Retriever 策略](./06-rag/04-retrievers.md)
 - [高级 RAG 技术](./06-rag/05-advanced-rag.md)
 - [RAG Agent](./06-rag/06-rag-agent.md)

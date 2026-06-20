@@ -1,7 +1,7 @@
 ---
-title: Document Loaders
+title: Document Loaders 文档加载器
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/XJYtw6sKHiI7W2kA1KtcQK9ln2g"
-last_synced: "2026-05-25T02:42:35+08:00"
+last_synced: "2026-06-20T20:35:22+08:00"
 ---
 
 > 模块 06 - RAG | 前置知识：[RAG 基础管线](./01-rag-pipeline.md)

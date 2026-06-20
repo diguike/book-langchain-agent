@@ -1,7 +1,7 @@
 ---
-title: RunnableParallel
+title: RunnableParallel 并行链
 feishu_url: "https://fivwvysqdz.feishu.cn/wiki/FXDQwB5FRie8bHkPo4TcIEsBnvf"
-last_synced: "2026-06-20T20:08:16+08:00"
+last_synced: "2026-06-20T20:35:22+08:00"
 ---
 
 > 模块 02 - Chain 组合 | 前置知识：[RunnableSequence](./01-runnable-sequence.md)
