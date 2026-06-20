@@ -63,13 +63,13 @@ const second = await app.invoke(
 );
 ```
 
-## 在 createAgent 上声明 typed interrupt
+## 在 createAgent 上用 humanInTheLoopMiddleware
 
-`createAgent` 直接支持 `interrupts` 配置，比手写 graph 节点省好几行：
+注意：`createAgent` **没有** `interrupts` 这个参数。1.x 的声明式 HITL 走 `humanInTheLoopMiddleware`——把它挂进 [middleware](./07-middleware.md) 数组，声明"哪些工具调用前要人审"，比手写 graph 节点省好几行。它在 `afterModel` 拦截模型产出的工具调用，因此**必须配 checkpointer**。
 
 ```typescript
-// createAgent-with-interrupts.ts
-import { createAgent } from "langchain";
+// createAgent-with-hitl.ts
+import { createAgent, humanInTheLoopMiddleware } from "langchain";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { tool } from "@langchain/core/tools";
 import { MemorySaver, Command } from "@langchain/langgraph";
@@ -116,29 +116,32 @@ const agent = createAgent({
   tools: [deleteRows, transfer, queryRows],
   systemPrompt: "你是数据库管理助手。",
 
-  // typed interrupt 配置
-  interrupts: {
-    // 哪些工具调用前必须人审
-    beforeToolCall: {
-      tools: ["delete_rows", "transfer"],
-      // 给前端展示的载荷类型
-      payload: (toolCall) => ({
-        type: "tool_approval" as const,
-        toolName: toolCall.name,
-        args: toolCall.args,
-        riskLevel: "high" as const,
-      }),
-    },
-  },
+  middleware: [
+    humanInTheLoopMiddleware({
+      // 按工具名声明审批策略
+      interruptOn: {
+        delete_rows: {
+          // 允许的人审决策：通过 / 改参数 / 拒绝
+          allowedDecisions: ["approve", "edit", "reject"],
+          description: "删除操作需人工审批，请核对 table 与 where",
+        },
+        transfer: {
+          allowedDecisions: ["approve", "reject"],
+        },
+        query_rows: false, // 只读，直接放行
+      },
+      descriptionPrefix: "高风险操作待审批",
+    }),
+  ],
 
-  // typed interrupt 必须配 checkpointer
+  // humanInTheLoopMiddleware 必须配 checkpointer
   checkpointer: new MemorySaver(),
 });
 ```
 
-`interrupts.beforeToolCall.tools` 数组里列的工具会在执行前自动触发 interrupt。`payload` 函数决定抛给调用方什么数据——返回什么类型，恢复时 `Command({ resume })` 就要传对应的回应类型。
+`interruptOn` 里值为对象的工具会在执行前暂停；值为 `false`（或不列）的工具直接放行。`allowedDecisions` 决定人审能做哪几种动作。
 
-调用流程：
+调用流程——第一次 invoke 跑到待审工具就停下，从返回值的 `__interrupt__` 拿待审信息：
 
 ```typescript
 const cfg = { configurable: { thread_id: "admin-session-1" } };
@@ -153,24 +156,38 @@ const r1 = await agent.invoke(
   cfg
 );
 
-// 2. Agent 走到 delete_rows 工具调用前暂停，r1 里能看到 interrupt 信息
-const state = await agent.getState(cfg);
-console.log("暂停于:", state.next); // ["tools"]
-// 如果此处返回 undefined，用 console.log(state) 检查 LangGraph 当前版本的数据结构
-console.log("待审批:", state.tasks[0]?.interrupts?.[0]?.value);
-// → { type: "tool_approval", toolName: "delete_rows", args: { table: "users", where: "status='deleted'" }, riskLevel: "high" }
+// 2. Agent 在 delete_rows 执行前暂停，待审信息在 __interrupt__ 里
+if (r1.__interrupt__) {
+  const request = r1.__interrupt__[0].value;
+  console.log("待审工具调用:", request.actionRequests);
+  // → [{ name: "delete_rows", args: { table: "users", where: "status='deleted'" } }]
+}
 
-// 3. 前端展示给运维，运维点"批准"
+// 3. 前端展示给运维，运维点"批准"——用 Command({ resume }) 喂回决策
 const r2 = await agent.invoke(
-  new Command({ resume: { action: "approve" } }),
+  new Command({ resume: { decisions: [{ type: "approve" }] } }),
   cfg
 );
 
 // 4. Agent 继续执行 delete_rows，拿到结果回模型节点，给用户最终回复
-console.log(r2.messages.at(-1)?.content);
+console.log(r2.messages.at(-1)?.text);
 ```
 
-resume 传的值是什么 schema，由你跟前端约好——`{ action: "approve" }`、`{ action: "reject", reason: "..." }`、`{ action: "modify", newArgs: { ... } }` 都行。
+resume 的 `decisions` 数组对应每个待审工具调用，有三种决策类型：
+
+```typescript
+// 通过，照原样执行
+{ decisions: [{ type: "approve" }] }
+
+// 改参数再执行（allowedDecisions 含 "edit" 才行）
+{ decisions: [{ type: "edit",
+  editedAction: { name: "delete_rows", args: { table: "users", where: "status='archived'" } } }] }
+
+// 拒绝，并给模型一条反馈
+{ decisions: [{ type: "reject", message: "生产库禁止此操作" }] }
+```
+
+`edit` 直接修改工具参数、`reject` 把反馈作为工具结果回灌给模型，都不用你手写消息替换逻辑——middleware 内部处理好了。
 
 ## 静态 interrupt vs 动态 interrupt
 
@@ -178,10 +195,10 @@ LangGraph 提供两种方式触发暂停：
 
 | 方式 | 怎么用 | 适用场景 |
 |------|--------|----------|
-| 静态 | 在 `compile()` 或 `createAgent` 时声明 `interruptBefore` / `interruptAfter` | "凡是调这个工具就要审" |
+| 声明式 | `createAgent` 挂 `humanInTheLoopMiddleware({ interruptOn })`；手写 graph 用 `compile({ interruptBefore })` | "凡是调这个工具就要审" |
 | 动态 | 在节点函数里手动调 `interrupt(payload)` | "金额超过 1 万才要审" |
 
-上面 `createAgent` 那个例子是静态的——只要工具名在 `tools` 数组里，就一定暂停。
+上面 `createAgent` 那个例子是声明式的——只要工具名在 `interruptOn` 里且值不是 `false`，就一定暂停。
 
 动态的写法（手写 graph 时）：
 
@@ -446,7 +463,7 @@ status: pending
 
 [Multi-Agent](./08-multi-agent.md) 里的退款 Agent 一上来就该挂 interrupt——退款是不可逆操作。两种集成方式：
 
-1. 用 `createAgent` 创建退款 Agent 时直接在 `interrupts.beforeToolCall.tools` 里写 `["initiate_refund"]`
+1. 用 `createAgent` 创建退款 Agent 时挂 `humanInTheLoopMiddleware({ interruptOn: { initiate_refund: true } })`
 2. 在 supervisor graph 的"调用退款 Agent"节点前面塞一个动态 interrupt 节点，按金额阈值决定要不要暂停
 
 推荐方式 1——审批逻辑紧贴工具更内聚。整个多 Agent 系统的 supervisor 不用关心这件事。
@@ -495,7 +512,7 @@ async function badNode(state: ...) {
 
 ## 小结
 
-Human-in-the-Loop 用 `interrupt()` 在节点内暂停 graph、用 `Command({ resume })` 喂回人决策。`createAgent` 直接支持 `interrupts.beforeToolCall` 声明式配置，手写 graph 时用动态 `interrupt()`。配合 checkpointer 可以做到跨进程长时间暂停。修改决策走"相同 message id 替换"的技巧。
+Human-in-the-Loop 用 `interrupt()` 在节点内暂停 graph、用 `Command({ resume })` 喂回人决策。`createAgent` 通过 `humanInTheLoopMiddleware({ interruptOn })` 声明式配置（注意它**没有** `interrupts` 参数），手写 graph 时用动态 `interrupt()`。配合 checkpointer 可以做到跨进程长时间暂停。手写 graph 里修改决策走"相同 message id 替换"的技巧。
 
 至此模块 05 的核心架构全部讲完——`createAgent` 基础、ReAct 循环、Plan-and-Execute、Self-Reflection、Multi-Agent、HITL、LangGraph 底层、State 与 Checkpointer、Middleware 系统、流式输出。下一步进入 [模块 06：RAG](../06-rag/)，把外部知识接入 Agent。
 

@@ -20,7 +20,7 @@ last_synced: "2026-05-25T02:43:54+08:00"
 | **Annotation** | `Annotation.Root({ ... })` | 状态注解 | LangGraph 中定义 `State Schema` 的 API，每个字段可单独指定 reducer 和 default | 05 State、Channels |
 | **Channel** | LangGraph Channel | 通道 | `State` 中每个字段对应一条 channel，定义其更新规则（reducer） | 05 State、Channels |
 | **Checkpointer** | `MemorySaver` / `PostgresSaver` | 检查点存储 | LangGraph 持久化 `State` 的存储后端，按 `thread_id` 分线程保存 | 05 State、Channels |
-| **typed interrupt** | `interrupts: { ... }` + `interrupt(...)` | 类型化中断 | 1.x 新的 HITL 中断 API，中断值带 TypeScript 类型，恢复时类型安全 | 05 Human-in-the-Loop |
+| **typed interrupt** | `humanInTheLoopMiddleware({ interruptOn })` + `interrupt()`（`@langchain/langgraph`） | 类型化中断 | 1.x 新的 HITL 中断 API：createAgent 经 `humanInTheLoopMiddleware` 配置审批点，节点内调用 `interrupt()` 触发，中断值带 TypeScript 类型，恢复时类型安全 | 05 Human-in-the-Loop |
 | **Stream Mode** | `streamMode: "values" \| "updates" \| "messages" \| "debug" \| "custom"` | 流模式 | LangGraph 流式输出的粒度选择 | 05 流式输出深入 |
 | **Reducer** | reducer function | 归约器 | Annotation 字段上的合并函数，决定新值如何并入旧值 | 05 State、Channels |
 | **Supervisor / Worker** | Multi-Agent topology | 主管 / 工作者 | 多 Agent 协作模式：Supervisor 路由任务，Worker 执行专项任务 | 05 Multi-Agent |

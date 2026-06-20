@@ -4,7 +4,7 @@ feishu_url: "https://fivwvysqdz.feishu.cn/wiki/TcI0waerqi2rwTkvWqvcZnOsn5f"
 last_synced: "2026-05-25T02:43:42+08:00"
 ---
 
-> LangChain.js 1.x（写作时主版本 `langchain@1.4.x` / `@langchain/core@1.4.x`）。本表只列 1.x 仍然推荐的 API，已废弃的（`.bind()`、`.map()`、`RemoteRunnable`、`AgentExecutor` 等）一律不写。
+> LangChain.js 1.x（写作时主版本 `langchain@1.5.x` / `@langchain/core@1.5.x`）。本表只列 1.x 仍然推荐的 API，已废弃的（`.bind()`、`.map()`、`RemoteRunnable`、`AgentExecutor` 等）一律不写。
 
 ## createAgent —— Agent 构建主入口
 
@@ -94,13 +94,13 @@ const logMiddleware = createMiddleware({
 
 | API | 包 | 说明 |
 |-----|-----|------|
-| `new ChatAnthropic({ model, temperature, thinkingBudget })` | `@langchain/anthropic` | Claude（Opus/Sonnet/Haiku 4.x） |
+| `new ChatAnthropic({ model, temperature, thinking })` | `@langchain/anthropic` | Claude（Opus/Sonnet/Haiku 4.x），扩展思考用 `thinking: { type: "enabled", budget_tokens }` |
 | `new ChatOpenAI({ model, temperature })` | `@langchain/openai` | GPT-5 / GPT-4o |
 | `new ChatGoogleGenerativeAI({ model })` | `@langchain/google-genai` | Gemini |
 | `model.invoke(messages)` | `@langchain/core` | 同步调用，返回 AIMessage |
 | `model.stream(messages)` | `@langchain/core` | 流式调用 |
 | `model.batch(inputs)` | `@langchain/core` | 批量并发 |
-| `model.withStructuredOutput(schema, { strategy })` | `@langchain/core` | 结构化输出，`strategy` 见下节 |
+| `model.withStructuredOutput(schema, { method })` | `@langchain/core` | 结构化输出，`method` 见下节 |
 
 不要再用 `.bindTools()` 预先绑定工具。1.x 把工具绑定交给 `createAgent` 内部统一处理。
 
@@ -112,9 +112,9 @@ const logMiddleware = createMiddleware({
 import { toolStrategy, providerStrategy } from "langchain";
 
 // 走 tool calling 实现（兼容性最好）
-model.withStructuredOutput(schema, { strategy: "tool" });
-// 等价写法：
-model.withStructuredOutput(toolStrategy(schema));
+model.withStructuredOutput(schema, { method: "functionCalling" });
+// createAgent 的 responseFormat 用 toolStrategy 表达同一策略：
+toolStrategy(schema);
 
 // 走 provider 原生 strict JSON
 model.withStructuredOutput(providerStrategy(schema));
@@ -215,7 +215,7 @@ const search = tool(
 
 ## Memory / Checkpointer
 
-包：`@langchain/langgraph/checkpointers` / `@langchain/langgraph-checkpoint-postgres`。
+包：`@langchain/langgraph`（`MemorySaver` 已从 `@langchain/langgraph-checkpoint` 再导出）/ `@langchain/langgraph-checkpoint-postgres`。
 
 | API | 说明 |
 |-----|------|
@@ -228,11 +228,8 @@ const search = tool(
 递归上限 `recursionLimit`（LangGraph 默认 25，每经过一个节点 +1，避免死循环）：
 
 ```typescript
-// 调用时按次设置
+// recursionLimit 是 invoke/stream 的调用配置，不是 compile 参数
 await agent.invoke(input, { recursionLimit: 25 });
-
-// 或编译时设置（适用于底层 StateGraph）
-graph.compile({ checkpointer, recursionLimit: 25 });
 ```
 
 ## LangGraph 底层 API
@@ -247,7 +244,7 @@ graph.compile({ checkpointer, recursionLimit: 25 });
 | `graph.addNode(name, fn)` | 加节点 |
 | `graph.addEdge(from, to)` | 加固定边 |
 | `graph.addConditionalEdges(from, routerFn)` | 加条件路由 |
-| `graph.compile({ checkpointer, interrupts })` | 编译图 |
+| `graph.compile({ checkpointer, interruptBefore, interruptAfter })` | 编译图；`interruptBefore` / `interruptAfter` 按节点名配置断点 |
 | `interrupt(value)`（在节点内调用） | 触发 typed interrupt，挂起等待 |
 | `Command({ goto, update })` | 节点返回 Command 显式控制下一跳和 State 更新 |
 

@@ -14,9 +14,42 @@ last_synced: "2026-05-25T02:41:26+08:00"
 
 裁剪是有损的，且损得很粗暴——按时间，不按重要性。Summary 策略要解决的就是这个：**旧消息不是被丢弃，而是被 LLM 压缩成一句摘要塞回去**。
 
-老 LangChain 里这套叫 `ConversationSummaryMemory` / `ConversationSummaryBufferMemory`。1.x 把它从一个独立的 Memory 类升级成**一段你自己写的 middleware**，可以精确控制压缩时机、压缩 prompt、保留窗口大小。
+老 LangChain 里这套叫 `ConversationSummaryMemory` / `ConversationSummaryBufferMemory`。1.x 把它做成了 middleware：官方在主包 `langchain` 里直接给了一个 `summarizationMiddleware`，开箱即用；想精确控制压缩时机、压缩 prompt、保留窗口，再自己写一段 middleware。先看官方版。
 
-## Summary middleware 的设计
+## 官方 `summarizationMiddleware`
+
+绝大多数场景不需要自己写。`langchain` 主包导出的 `summarizationMiddleware` 已经覆盖了"超过阈值就压缩旧消息、保留最近 N 条"这套标准逻辑：
+
+```typescript
+import { createAgent, summarizationMiddleware } from "langchain";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { MemorySaver } from "@langchain/langgraph";
+
+const agent = createAgent({
+  model: "anthropic:claude-sonnet-4-6",
+  tools: [],
+  middleware: [
+    summarizationMiddleware({
+      // 压缩用的模型，给个便宜的就行
+      model: new ChatAnthropic({ model: "claude-haiku-4-5" }),
+      // 触发条件：消息数 >= 20（也可用 { tokens: 4000 } 按 token 触发）
+      trigger: { messages: 20 },
+      // 压缩后保留最近 6 条原始消息（也可用 { tokens: 2000 }）
+      keep: { messages: 6 },
+    }),
+  ],
+  checkpointer: new MemorySaver(),
+});
+
+const config = { configurable: { thread_id: "long-chat" } };
+await agent.invoke({ messages: [{ role: "user", content: "我叫张三" }] }, config);
+```
+
+`trigger` 和 `keep` 都接受 `{ messages }` 或 `{ tokens }`，把同时给两个字段当成"AND"条件。压缩出来的摘要会以一条 system message 的形式留在历史里，旧消息被替换掉，这套行为和下面手写版本一致——只是不用你自己维护。
+
+下面这套手写实现，是在你想理解内部机制、或官方默认行为满足不了需求（自定义摘要结构、按业务字段保留、把摘要存进自定义 state 字段）时的进阶方案。
+
+## 手写 Summary middleware 的设计
 
 整体思路：
 

@@ -547,7 +547,22 @@ class SafeSqlTool {
           return JSON.stringify({ error: "不允许多语句执行" });
         }
 
-        // 4. 强制 LIMIT
+        // 4. 表白名单：抽出 FROM / JOIN 后引用的表名，逐个对照
+        const referenced = [...normalized.matchAll(/\b(?:FROM|JOIN)\s+([A-Z0-9_]+)/g)].map(
+          (m) => m[1].toLowerCase()
+        );
+        if (referenced.length === 0) {
+          return JSON.stringify({ error: "未识别到查询的表" });
+        }
+        for (const table of referenced) {
+          if (!ALLOWED_TABLES.has(table)) {
+            return JSON.stringify({
+              error: `表 ${table} 不在白名单内，可用表：${[...ALLOWED_TABLES].join(", ")}`,
+            });
+          }
+        }
+
+        // 5. 强制 LIMIT
         const limitedSql = normalized.includes("LIMIT")
           ? sql
           : `${sql} LIMIT ${limit}`;

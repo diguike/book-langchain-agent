@@ -399,7 +399,7 @@ async function dualCriticNode(state: typeof ReflectionState.State) {
 
 Self-Reflection 把"生成"和"评审"拆成两个独立的 LangGraph 节点，Generator 用 Sonnet 4.6 生成，Critic 用 Claude Opus 4.7 按 rubric 打分并给出可执行反馈。带累积 lessons 是 Reflexion 风格——避免反复犯同样的错。停止条件用"达标 + 最大轮次 + 改进幅度"三条组合。生产场景下，对长文写作、报告生成、代码评审等质量敏感任务有明显增益。
 
-下一节 [LangGraph 入门](./03-langgraph-intro.md) 系统讲 `StateGraph` 的核心抽象——前面 Plan-and-Execute 和 Self-Reflection 用到的所有东西都会展开。
+下一节 [Middleware 系统](./07-middleware.md) 讲怎么用统一的钩子接口给 Agent 注入审计、限流、缓存、动态提示等横切逻辑。
 
 ---
 

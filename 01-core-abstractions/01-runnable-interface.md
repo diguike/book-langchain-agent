@@ -83,10 +83,8 @@ const results = await model.batch(
     [{ role: "user", content: "2+2=?" }],
     [{ role: "user", content: "3+3=?" }],
   ],
-  {
-    maxConcurrency: 3,        // 同时最多 3 个请求
-    returnExceptions: true,   // 单个失败不中断其他
-  }
+  { maxConcurrency: 3 },        // 第二参 RunnableConfig：同时最多 3 个请求
+  { returnExceptions: true }    // 第三参 batchOptions：单个失败不中断其他
 );
 
 for (const item of results) {
@@ -162,7 +160,7 @@ interface RunnableConfig {
   maxConcurrency?: number;     // batch 用
   recursionLimit?: number;     // LangGraph 循环上限
   signal?: AbortSignal;        // 取消信号
-  context?: Record<string, unknown>;   // 1.x 新加的运行时上下文
+  configurable?: Record<string, unknown>;   // 运行时参数（可配置字段）
 }
 ```
 
@@ -190,16 +188,16 @@ setTimeout(() => controller.abort(), 30_000);
 await chain.invoke({ question: "..." }, { signal: controller.signal });
 ```
 
-**`context`**，向链或 Agent 内部传运行时参数（比如当前用户的 tier、租户 ID）：
+**`configurable`**，向链内部传运行时参数（比如当前用户的 tier、租户 ID）：
 
 ```typescript
 await chain.invoke(
   { question: "..." },
-  { context: { userId: "u-123", tier: "pro" } }
+  { configurable: { userId: "u-123", tier: "pro" } }
 );
 ```
 
-Agent 的 middleware、动态 system prompt 都从 `runtime.context` 里取这一份数据。详见 [Middleware 系统](../05-agent-architecture/07-middleware.md)。
+链内的 `RunnableLambda` 从 `config?.configurable` 里取这一份数据。createAgent 场景另有独立的 `context` 运行时上下文（配合 `contextSchema`），与这里的 `configurable` 不是同一套机制，详见 [Middleware 系统](../05-agent-architecture/07-middleware.md)。
 
 ## 4. withConfig：把配置黏在 Runnable 上
 

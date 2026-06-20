@@ -26,12 +26,13 @@
 
 ## 03 记忆系统
 
-- [Memory 架构总览](./03-memory/01-memory-overview.md)
-- [Buffer Memory](./03-memory/02-buffer-memory.md)
-- [Summary Memory](./03-memory/03-summary-memory.md)
-- [VectorStore Memory](./03-memory/04-vectorstore-memory.md)
-- [自定义 MessageHistory 后端](./03-memory/05-custom-message-history.md)
+- [1.x 时代的记忆系统](./03-memory/01-memory-overview.md)
+- [短期记忆 - thread-based checkpointer](./03-memory/02-buffer-memory.md)
+- [Summary 策略 - 用 middleware 压缩历史](./03-memory/03-summary-memory.md)
+- [VectorStore 记忆作为工具](./03-memory/04-vectorstore-memory.md)
+- [自定义后端 - 实现自己的 checkpointer 与 store](./03-memory/05-custom-message-history.md)
 - [多用户记忆隔离](./03-memory/06-multi-user-isolation.md)
+- [长期记忆 - Store 语义召回](./03-memory/07-long-term-store-semantic.md)
 
 ## 04 工具与函数调用
 
@@ -53,6 +54,10 @@
 - [Multi-Agent 协作](./05-agent-architecture/08-multi-agent.md)
 - [Human-in-the-Loop 与 typed interrupt](./05-agent-architecture/09-human-in-the-loop.md)
 - [流式输出深入 Stream Modes 与 Events](./05-agent-architecture/10-stream-modes.md)
+- [Deep Agents 深度智能体](./05-agent-architecture/11-deep-agents.md)
+- [内置 Middleware 全景](./05-agent-architecture/12-middleware-builtin.md)
+- [Supervisor 模式（官方 prebuilt）](./05-agent-architecture/13-supervisor.md)
+- [Swarm 模式（官方 prebuilt）](./05-agent-architecture/14-swarm.md)
 
 ## 06 RAG
 
@@ -69,14 +74,16 @@
 - [LangSmith Tracing](./07-observability/02-langsmith-tracing.md)
 - [评估方法与指标](./07-observability/03-evaluation.md)
 - [Prompt 工程优化](./07-observability/04-prompt-engineering.md)
+- [Agent 轨迹评估](./07-observability/05-agent-trajectory-eval.md)
 
 ## 08 生产部署
 
 - [API 服务化](./08-production/01-api-server.md)
-- [流式接口 SSE / WebSocket](./08-production/02-streaming-api.md)
+- [流式接口部署](./08-production/02-streaming-api.md)
 - [缓存与成本优化](./08-production/03-caching-cost.md)
 - [安全防御](./08-production/04-security.md)
 - [部署架构](./08-production/05-deployment-architecture.md)
+- [LangGraph Platform 部署](./08-production/06-langgraph-platform.md)
 
 ## 09 综合项目
 
@@ -84,6 +91,11 @@
 - [代码助手 Agent](./09-projects/02-code-assistant.md)
 - [数据分析 Agent](./09-projects/03-data-analysis.md)
 - [多 Agent 工作流平台](./09-projects/04-multi-agent-platform.md)
+- [深度调研 Agent](./09-projects/05-deep-research-agent.md)
+
+## 10 前端集成
+
+- [生成式 UI 与 useStream](./10-frontend-ui/01-streaming-ui-usestream.md)
 
 ## 附录
 

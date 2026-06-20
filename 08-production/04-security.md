@@ -306,33 +306,28 @@ const sandbox = new ToolSandbox({
 
 ### HITL 审批：敏感操作必须人工确认
 
-LangGraph 1.x 的 `interrupts` 配置让 Agent 在调用敏感工具前停下来等人工批准。`beforeTool` 回调的签名、`interrupt()` 抛出后如何用 `Command({ resume })` 续跑、前端怎么呈现审批界面，完整用法见 [Human-in-the-Loop 一节的 typed interrupt 部分](../05-agent-architecture/09-human-in-the-loop.md)。下面只从安全角度截取一段示意：
+LangChain 1.x 的 `humanInTheLoopMiddleware` 让 Agent 在调用敏感工具前停下来等人工批准。它挂进 `middleware` 数组、需配 checkpointer；`interruptOn` 声明哪些工具要审、`Command({ resume })` 如何续跑、前端怎么呈现审批界面，完整用法见 [Human-in-the-Loop](../05-agent-architecture/09-human-in-the-loop.md)。下面只从安全角度截取一段示意：
 
 ```typescript
-import { createAgent, interrupt } from "langchain";
+import { createAgent, humanInTheLoopMiddleware } from "langchain";
+import { MemorySaver } from "@langchain/langgraph";
 
-const sensitiveTools = ["send_email", "transfer_money", "delete_record"];
-
-// 在工具执行前 interrupt
+// 敏感工具执行前必须人审
 const agent = createAgent({
   model: /* ... */,
   tools: [/* ... */],
   systemPrompt: "...",
-  interrupts: {
-    // call 由 LangGraph 注入，包含 { name, args, id } —— 即模型本轮发出的 tool_call
-    beforeTool: async (call) => {
-      if (sensitiveTools.includes(call.name)) {
-        const approval = await interrupt({
-          type: "tool_approval_request",
-          tool: call.name,
-          args: call.args,
-          prompt: `是否允许 Agent 执行 ${call.name}？参数：${JSON.stringify(call.args)}`,
-        });
-        return approval === "approved";
-      }
-      return true;
-    },
-  },
+  middleware: [
+    humanInTheLoopMiddleware({
+      interruptOn: {
+        send_email: { allowedDecisions: ["approve", "reject"] },
+        transfer_money: { allowedDecisions: ["approve", "reject"] },
+        delete_record: { allowedDecisions: ["approve", "reject"] },
+      },
+      descriptionPrefix: "敏感操作待人工批准",
+    }),
+  ],
+  checkpointer: new MemorySaver(),
 });
 ```
 
@@ -354,7 +349,13 @@ const writeAgent = createAgent({
   model,
   tools: [updateOrder, refundOrder], // 写操作 Agent 独立
   systemPrompt: "...",
-  interrupts: { /* 所有写操作必审批 */ },
+  // 所有写操作必审批
+  middleware: [
+    humanInTheLoopMiddleware({
+      interruptOn: { updateOrder: true, refundOrder: true },
+    }),
+  ],
+  checkpointer: new MemorySaver(),
 });
 ```
 
@@ -509,8 +510,11 @@ const agent = createAgent({
   model,
   tools,
   systemPrompt: "...",
-  recursionLimit: 25, // LangGraph 默认 25，敏感场景可以调低
 });
+
+// recursionLimit 不是 createAgent 的构造参数，而是运行时配置，
+// 传给 invoke / stream 才生效（LangGraph 默认 25，敏感场景可以调低）
+await agent.invoke(input, { recursionLimit: 25 });
 ```
 
 ## 第四层：运维侧防御
@@ -522,7 +526,7 @@ const agent = createAgent({
 
 // 启动时检查必要环境变量
 export function validateSecrets() {
-  const required = ["ANTHROPIC_API_KEY", "LANGCHAIN_API_KEY", "JWT_SECRET"];
+  const required = ["ANTHROPIC_API_KEY", "LANGSMITH_API_KEY", "JWT_SECRET"];
   const missing = required.filter((k) => !process.env[k]);
   if (missing.length > 0) {
     throw new Error(`Missing secrets: ${missing.join(", ")}`);

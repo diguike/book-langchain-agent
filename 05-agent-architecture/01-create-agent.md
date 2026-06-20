@@ -98,7 +98,6 @@ createAgent({
   responseFormat, // 可选：结构化输出 schema
   stateSchema,    // 可选：自定义状态
   checkpointer,   // 可选：会话持久化（线程级 memory）
-  interrupts,     // 可选：HITL 配置
   name,           // 可选：Agent 名字（多 Agent 协作时用）
 })
 ```
@@ -111,8 +110,9 @@ createAgent({
 | `responseFormat` | [Output Parsers](../01-core-abstractions/05-output-parsers.md) |
 | `stateSchema` | [State、Channels 与 Checkpointer](./04-langgraph-state.md) |
 | `checkpointer` | [State、Channels 与 Checkpointer](./04-langgraph-state.md) |
-| `interrupts` | [Human-in-the-Loop 与 typed interrupt](./09-human-in-the-loop.md) |
 | `name` | [Multi-Agent 协作](./08-multi-agent.md) |
+
+注意 `createAgent` **没有** `interrupts` 这个参数。Human-in-the-Loop（工具调用前人工审批）在 1.x 里通过 `humanInTheLoopMiddleware` 挂到 `middleware` 数组实现，配合 `checkpointer` 持久化中断状态，详见 [Human-in-the-Loop](./09-human-in-the-loop.md)。
 
 ### `model` 的两种写法
 
@@ -130,7 +130,7 @@ model: "openai:gpt-4o"
 model: new ChatAnthropic({ model: "claude-sonnet-4-6", temperature: 0 })
 ```
 
-字符串写法简洁，实例写法可以精细控制 `temperature`、`maxTokens`、`thinkingBudget`（Claude 推理模式）等参数。**注意：不要再用 `.bindTools()` 预先绑定工具**——这是 v0.3 的写法，1.x 把这件事交给 `createAgent` 内部统一处理。
+字符串写法简洁，实例写法可以精细控制 `temperature`、`maxTokens`、`thinking`（Claude 推理模式，传 `{ type: "enabled", budget_tokens }`）等参数。**注意：不要再用 `.bindTools()` 预先绑定工具**——这是 v0.3 的写法，1.x 把这件事交给 `createAgent` 内部统一处理。
 
 ### `systemPrompt` 的两种写法
 

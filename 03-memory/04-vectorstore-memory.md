@@ -145,14 +145,14 @@ const embeddings = new OpenAIEmbeddings({
 |------|----|----|
 | `MemoryVectorStore` | `langchain/vectorstores/memory` | 开发、测试 |
 | `Chroma` | `@langchain/community/vectorstores/chroma` | 本地原型、中小规模 |
-| `PGVectorStore` (pgvector) | `@langchain/community/vectorstores/pgvector` | 已有 Postgres 基建 |
+| `PGVectorStore` (pgvector) | `@langchain/pgvector` | 已有 Postgres 基建 |
 | `Qdrant` | `@langchain/qdrant` | 生产高性能 |
 | `Pinecone` | `@langchain/pinecone` | 全托管 SaaS |
 
 pgvector 是我对中小型 Agent 项目的默认推荐——和 `PostgresSaver` 共用一个数据库，运维成本低：
 
 ```typescript
-import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+import { PGVectorStore } from "@langchain/pgvector";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 const embeddings = new OpenAIEmbeddings({ model: "text-embedding-3-small" });

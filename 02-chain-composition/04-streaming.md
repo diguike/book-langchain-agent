@@ -63,7 +63,7 @@ const streamable = prompt.pipe(model).pipe(new StringOutputParser());
 // [bad] parser 处阻断
 const blocked1 = prompt
   .pipe(model)
-  .pipe(model.withStructuredOutput(schema, { strategy: "tool" }));
+  .pipe(model.withStructuredOutput(schema, { method: "functionCalling" }));
 
 // [bad] lambda 处阻断（普通函数等完整输入）
 const blocked2 = prompt
@@ -72,21 +72,17 @@ const blocked2 = prompt
   .pipe((text: string) => text.toUpperCase());
 ```
 
-### 让 lambda 保持流式：用 `transform`
+### 让 lambda 保持流式：`func` 返回 async generator
 
-`RunnableLambda` 的构造器接受第二个字段 `transform`，签名是 `(chunks: AsyncIterable<I>) => AsyncIterable<O>`。提供了 `transform`，链就能继续保持流式：
+`RunnableLambda` 的构造器只接受 `func` 一个字段。要让 lambda 保持流式，关键是让 `func` 返回一个 async generator（`AsyncIterable`）——LangChain 会把它当成流，逐段往下游推：
 
 ```typescript
 import { RunnableLambda } from "@langchain/core/runnables";
 
 const upper = new RunnableLambda<string, string>({
-  // 非流式兜底
-  func: (input) => input.toUpperCase(),
-  // 流式实现：来一段处理一段
-  transform: async function* (chunks) {
-    for await (const chunk of chunks) {
-      yield chunk.toUpperCase();
-    }
+  // func 返回 async generator：来一段处理一段，而不是等完整输入
+  func: async function* (input) {
+    yield input.toUpperCase();
   },
 });
 
@@ -148,18 +144,21 @@ for await (const event of eventStream) {
 
 ### 过滤事件
 
-复杂链里事件量非常大，必须过滤。`streamEvents` 支持三种过滤参数：
+复杂链里事件量非常大，必须过滤。`streamEvents` 的过滤参数属于第三个 `streamOptions` 参数（对应 `EventStreamCallbackHandlerInput` 类型），不是第二参数：
 
 ```typescript
-const eventStream = chain.streamEvents(input, {
-  version: "v2",
-  // 只听这些 name 的节点
-  includeNames: ["MainModel"],
-  // 或者按 tag 过滤
-  includeTags: ["important"],
-  // 或者按类型过滤
-  includeTypes: ["chat_model"],
-});
+const eventStream = chain.streamEvents(
+  input,
+  { version: "v2" },
+  {
+    // 只听这些 name 的节点
+    includeNames: ["MainModel"],
+    // 或者按 tag 过滤
+    includeTags: ["important"],
+    // 或者按类型过滤
+    includeTypes: ["chat_model"],
+  },
+);
 ```
 
 给节点打 tag 和 name：
@@ -307,7 +306,7 @@ try {
 | `.streamEvents({ version: "v2" })` | 拿链中每个节点的事件，适合复杂 UI / 调试 |
 | 全链流式 | ChatModel + StringOutputParser + Passthrough |
 | 阻断流的节点 | 结构化输出、普通 lambda、工具调用 |
-| 自定义流式 | 给 `RunnableLambda` 加 `transform` |
+| 自定义流式 | 让 `RunnableLambda` 的 `func` 返回 async generator |
 | 模型 chunk | 用 `chunk.contentBlocks` 拿统一格式 |
 | HTTP 集成 | SSE 是默认选择，WebSocket 用于双向场景；详见 08-生产部署 |
 | 取消 | `AbortController` + `signal`，客户端断连自动 abort |

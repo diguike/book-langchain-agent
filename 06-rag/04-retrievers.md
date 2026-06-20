@@ -10,6 +10,8 @@ last_synced: "2026-05-25T02:42:42+08:00"
 
 模型再强，检索没召回正确 chunk，也只能编。这一节聚焦"怎么把对的 chunk 召回来"，按由浅到深的顺序：基础向量检索 → MMR 多样性 → metadata filter → 混合检索 → HNSW (Hierarchical Navigable Small World) 调优。Multi-Query、Self-Query、Rerank 这些更重的方案放到 [高级 RAG](./05-advanced-rag.md) 那一节。
 
+本节会用到 langchain 1.x 的几个不同包，import 路径别混了：`EnsembleRetriever`、`ContextualCompressionRetriever` 这类经典 retriever 在 `@langchain/classic`；`BM25Retriever` 在社区包 `@langchain/community`；Qdrant、PGVector 这种规模较大的 provider 各自独立成包（`@langchain/qdrant`、`@langchain/pgvector`），不再走 `@langchain/community` 子路径。
+
 ## Retriever 接口和 VectorStoreRetriever
 
 `BaseRetriever` 是 LangChain.js 的检索抽象，所有 retriever 实现一个 `invoke(query)` 拿回 `Document[]`：
@@ -98,7 +100,7 @@ const retriever = chromaStore.asRetriever({
 **Qdrant**（用自己的 must/should/must_not 结构）：
 
 ```typescript
-import { QdrantVectorStore } from "@langchain/community/vectorstores/qdrant";
+import { QdrantVectorStore } from "@langchain/qdrant";
 
 const retriever = qdrantStore.asRetriever({
   k: 5,
@@ -126,7 +128,7 @@ const retriever = pineconeStore.asRetriever({
 **PGVector**（透过 SQL where）：
 
 ```typescript
-import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+import { PGVectorStore } from "@langchain/pgvector";
 
 const retriever = pgStore.asRetriever({
   k: 5,
@@ -184,7 +186,7 @@ LangChain.js 社区版有 `BM25Retriever`：
 
 ```typescript
 import { BM25Retriever } from "@langchain/community/retrievers/bm25";
-import { EnsembleRetriever } from "langchain/retrievers/ensemble";
+import { EnsembleRetriever } from "@langchain/classic/retrievers/ensemble";
 
 const bm25 = BM25Retriever.fromDocuments(allChunks, { k: 10 });
 const vector = store.asRetriever({ k: 10 });
@@ -231,8 +233,8 @@ const results = await client.query("kb", {
 检索回来的 chunk 可能 80% 是无关填充。让 LLM 在检索后做一次"摘要式压缩"，只保留与问题直接相关的句子：
 
 ```typescript
-import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
-import { LLMChainExtractor } from "langchain/retrievers/document_compressors/chain_extract";
+import { ContextualCompressionRetriever } from "@langchain/classic/retrievers/contextual_compression";
+import { LLMChainExtractor } from "@langchain/classic/retrievers/document_compressors/chain_extract";
 import { ChatOpenAI } from "@langchain/openai";
 
 const cheapLlm = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0 });

@@ -460,7 +460,7 @@ class CustomEventHandler extends BaseCallbackHandler {
 
 ## 跟 LangSmith 怎么并存
 
-LangSmith 自己就是一个 callback handler（环境变量 `LANGCHAIN_TRACING_V2=true` 时自动注册）。你写的自定义 handler 跟它并存，不冲突——所有 handler 都会被同一个事件依次触发。
+LangSmith 自己就是一个 callback handler（环境变量 `LANGSMITH_TRACING=true` 时自动注册，旧的 `LANGCHAIN_TRACING_V2` 前缀仍兼容）。你写的自定义 handler 跟它并存，不冲突——所有 handler 都会被同一个事件依次触发。
 
 实践配置：
 

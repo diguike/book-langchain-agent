@@ -456,6 +456,8 @@ if (lastRunId) {
 return answer;
 ```
 
+这里用闭包变量 `lastRunId` 捕获 runId 只适合单请求 demo：并发环境下多个请求的 `handleChainEnd` 会互相覆盖同一个变量，导致分数写错 trace。生产中要把 runId 放进 request-scoped 变量，或用 `AsyncLocalStorage` 按请求隔离。
+
 LangSmith 上聚合这个 feedback 就能看到生产质量的实时趋势。注意线上 judge 没有 ground truth，准确度会比离线低，主要用来看长期趋势和发现极端低分（直接转人工审核）。
 
 ## 注意事项总结

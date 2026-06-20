@@ -121,16 +121,16 @@ const result = await chain.invoke({ concept: "量子纠缠" });
 
 `assign` 的语义是"在原对象上加字段"，不删原字段。这个模式在并行分支和 RAG 链里都会反复出现，下一节 [RunnableParallel](./02-runnable-parallel.md) 会对比它和 `RunnableParallel` 的差异。
 
-## 运行时参数：用 `context` 不是 `configurable`
+## 运行时参数：通过 `configurable` 透传业务字段
 
-运行时参数通过 `context` 字段传入。所有 Runnable 的 `invoke` / `stream` / `batch` 都接受第二个参数：
+运行时参数通过 `configurable` 字段传入。所有 Runnable 的 `invoke` / `stream` / `batch` 都接受第二个参数：
 
 ```typescript
 await chain.invoke(
   { concept: "递归" },
   {
     // 运行时上下文：tenantId、userId、abTestGroup 这类业务字段都放这里
-    context: { userId: "u_42", tenantId: "acme" },
+    configurable: { userId: "u_42", tenantId: "acme" },
     // 给本次调用打 tag，便于在 LangSmith 里过滤
     tags: ["demo"],
     runName: "concept-explainer",
@@ -138,14 +138,14 @@ await chain.invoke(
 );
 ```
 
-`context` 里的字段会一路传到链中每个 Runnable 里。`RunnableLambda` 的函数签名第二个参数就是这个 config：
+`configurable` 里的字段会一路传到链中每个 Runnable 里。`RunnableLambda` 的函数签名第二个参数就是这个 config：
 
 ```typescript
 import { RunnableLambda } from "@langchain/core/runnables";
 
 const logger = new RunnableLambda({
   func: (input: string, config) => {
-    const userId = config?.context?.userId ?? "anonymous";
+    const userId = config?.configurable?.userId ?? "anonymous";
     console.log(`[${userId}] 接收到输入：${input}`);
     return input;
   },
@@ -200,10 +200,10 @@ const reviewSchema = z.object({
 });
 
 // 2. 用 withStructuredOutput 替代手写 parser
-//    1.x 推荐显式传 strategy: "tool"（基于 function calling，最稳）
+//    1.x 推荐显式传 method: "functionCalling"（基于 function calling，最稳）
 const model = new ChatOpenAI({ model: "gpt-4o", temperature: 0 });
 const structuredModel = model.withStructuredOutput(reviewSchema, {
-  strategy: "tool",
+  method: "functionCalling",
 });
 
 // 3. prompt
@@ -284,7 +284,7 @@ const qualityCheck = ChatPromptTemplate.fromTemplate(
 原文（{sourceLang}）：{text}
 译文（{targetLang}）：{translation}`,
 )
-  .pipe(model.withStructuredOutput(qualitySchema, { strategy: "tool" }));
+  .pipe(model.withStructuredOutput(qualitySchema, { method: "functionCalling" }));
 
 // 主链：把三个子链按顺序串起来，每步都把中间结果合并回输入
 const pipeline = RunnableSequence.from([
@@ -335,7 +335,7 @@ console.log(result);
 | 构造 | `RunnableSequence.from([...])` 或 `.pipe()` |
 | 数据流 | 单向，前一步输出即下一步输入 |
 | 类型推导 | TypeScript 泛型自动接龙，跨步骤的类型安全 |
-| 运行时参数 | 通过 `{ context: {...} }` 传给 invoke / stream / batch |
+| 运行时参数 | 通过 `{ configurable: {...} }` 传给 invoke / stream / batch |
 | 错误处理 | fail-fast，异常向上传播 |
 | 嵌套 | RunnableSequence 自己就是 Runnable，可以嵌套 |
 

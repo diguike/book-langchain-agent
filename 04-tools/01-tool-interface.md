@@ -196,7 +196,23 @@ const fetchUser = tool(
 );
 ```
 
-1.x 里 Tool 也可以返回 `ToolMessage` 对象，用 `artifact` 字段携带额外结构化产物（比如生成的图片二进制、大型对象引用），但 99% 的场景返回 string 就够了。
+如果要携带额外结构化产物（比如生成的图片二进制、大型对象引用），在 `tool()` 的第二个参数里设 `responseFormat: "content_and_artifact"`，执行函数返回 `[content, artifact]` 二元组——`content` 给模型看，`artifact` 不进模型上下文，由 LangChain 自动打包进 `ToolMessage` 的 `artifact` 字段。不需要自己 new `ToolMessage`。99% 的场景返回 string 就够了。
+
+```typescript
+const renderChart = tool(
+  async ({ data }) => {
+    const png = await buildChart(data);            // Buffer
+    const summary = `已生成图表，共 ${data.length} 个数据点`;
+    return [summary, png];                          // [content, artifact]
+  },
+  {
+    name: "render_chart",
+    description: "把数据渲染成图表",
+    schema: z.object({ data: z.array(z.number()) }),
+    responseFormat: "content_and_artifact",
+  }
+);
+```
 
 ## 错误处理：返回错误，不要抛异常
 
@@ -368,7 +384,7 @@ LangChain.js 生态自带一批开箱即用的 Tool，常用的有：
 
 | 工具 | 包 | 功能 |
 |------|------|------|
-| `TavilySearch` | `@langchain/community/tools/tavily_search` | Tavily 搜索引擎 |
+| `TavilySearch` | `@langchain/tavily` | Tavily 搜索引擎 |
 | `SerpAPI` | `@langchain/community/tools/serpapi` | Google 搜索结果 |
 | `WikipediaQueryRun` | `@langchain/community/tools/wikipedia_query_run` | Wikipedia 查询 |
 | `DuckDuckGoSearch` | `@langchain/community/tools/duckduckgo_search` | DuckDuckGo 搜索 |
@@ -377,11 +393,11 @@ LangChain.js 生态自带一批开箱即用的 Tool，常用的有：
 完整列表见 [LangChain Tools 集成文档](https://docs.langchain.com/oss/javascript/integrations/tools/)。
 
 ```typescript
-import { TavilySearch } from "@langchain/community/tools/tavily_search";
+import { TavilySearch } from "@langchain/tavily";
 
 const search = new TavilySearch({
   maxResults: 5,
-  apiKey: process.env.TAVILY_API_KEY,
+  tavilyApiKey: process.env.TAVILY_API_KEY,
 });
 
 const results = await search.invoke("LangChain.js 1.x 最新特性");

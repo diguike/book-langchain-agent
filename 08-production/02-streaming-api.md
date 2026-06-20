@@ -50,11 +50,11 @@ Cache-Control: no-cache
 Connection: keep-alive
 X-Accel-Buffering: no
 
-event: on_chat_model_stream
-data: {"chunk":{"contentBlocks":[{"type":"text","text":"你"}]}}
+event: messages
+data: [{"type":"AIMessageChunk","content":"你"},{"langgraph_node":"model_request"}]
 
-event: on_chat_model_stream
-data: {"chunk":{"contentBlocks":[{"type":"text","text":"好"}]}}
+event: messages
+data: [{"type":"AIMessageChunk","content":"好"},{"langgraph_node":"model_request"}]
 
 event: done
 data: {"status":"complete"}
@@ -265,12 +265,22 @@ export async function streamChat(
 
       try {
         const payload = JSON.parse(data);
-        if (eventName === "on_chat_model_stream") {
-          // LangGraph 用 contentBlocks 表示多模态
-          const text = payload.chunk?.contentBlocks
-            ?.filter((b: any) => b.type === "text")
-            .map((b: any) => b.text)
-            .join("") ?? "";
+        // encoding: "text/event-stream" + streamMode: "messages" 下，
+        // 事件名就是 "messages"（子图会带 namespace 后缀，如 "messages|sub"），
+        // data 是 [messageChunk, metadata] 元组，不是 on_chat_model_stream
+        if (eventName === "messages" || eventName.startsWith("messages|")) {
+          const [chunk] = payload as [any, any];
+          // content 可能是字符串，也可能是多模态 content blocks 数组
+          const content = chunk?.content;
+          const text =
+            typeof content === "string"
+              ? content
+              : Array.isArray(content)
+                ? content
+                    .filter((b: any) => b.type === "text")
+                    .map((b: any) => b.text)
+                    .join("")
+                : "";
           if (text) onToken(text);
         } else if (eventName === "done") {
           onDone();
@@ -356,7 +366,7 @@ iOS Safari / Chrome 锁屏几分钟后会暂停所有 fetch。回前台时连接
 
 LangGraph 的 `stream()` 不会内置心跳。如果你想要心跳，可以用 Hono 的 `streamSSE` helper 自己管理。
 
-跟前面 ReadableStream + `streamMode: "messages-tuple"` 的主路径不同，下面这段刻意不用 encoding 选项，而是手动遍历 `agent.stream()` 逐 token 写入 SSE——目的就是要在主循环里插入定时心跳，控制权得在自己手里：
+跟前面 ReadableStream + `streamMode: "messages"` 的主路径不同，下面这段刻意不用 encoding 选项，而是手动遍历 `agent.stream()` 逐 token 写入 SSE——目的就是要在主循环里插入定时心跳，控制权得在自己手里：
 
 ```typescript
 import { streamSSE } from "hono/streaming";

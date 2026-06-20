@@ -113,9 +113,9 @@ const extractionSchema = z.object({
   skills: z.array(z.string()).describe("技能列表"),
 });
 
-// 显式声明用 tool 策略
+// 显式声明用 functionCalling 方法
 const structuredModel = model.withStructuredOutput(extractionSchema, {
-  strategy: "tool",
+  method: "functionCalling",
 });
 
 const result = await structuredModel.invoke(
@@ -131,17 +131,17 @@ console.log(result);
 // }
 ```
 
-### strategy 参数
+### method 参数
 
-`strategy` 决定模型怎么被约束：
+`method` 决定模型怎么被约束：
 
 | 值 | 机制 | 适用 |
 |----|------|------|
-| `"tool"` | 把 schema 包成一个 tool，强制调用 | **默认推荐**，所有支持工具调用的模型 |
-| `"json_schema"` | 用 Provider 的 JSON Schema 模式 | OpenAI 的 `response_format: { type: "json_schema", ... }` |
-| `"provider"` | 用 Provider 特有机制（如 Anthropic 的 tool） | 想精细控制时 |
+| `"functionCalling"` | 把 schema 包成一个 tool，强制调用 | **默认推荐**，所有支持工具调用的模型 |
+| `"jsonSchema"` | 用 Provider 的 JSON Schema 模式 | OpenAI 的 `response_format: { type: "json_schema", ... }` |
+| `"jsonMode"` | 用 Provider 的 JSON 模式 | 想精细控制时 |
 
-绝大多数场景用 `"tool"` 就够了。
+绝大多数场景用 `"functionCalling"` 就够了。
 
 ### Zod schema 的描述字段
 
@@ -172,8 +172,8 @@ const reviewSchema = z.object({
 
 ```typescript
 const structuredModel = model.withStructuredOutput(extractionSchema, {
-  strategy: "tool",
-  name: "extract_person_info",      // tool 的名字（strategy 为 "tool" 时）
+  method: "functionCalling",
+  name: "extract_person_info",      // tool 的名字（method 为 "functionCalling" 时）
   includeRaw: true,                 // 同时返回模型原始输出，便于调试
 });
 
@@ -287,7 +287,7 @@ type ArticleAnalysis = z.infer<typeof articleAnalysisSchema>;
 // 2. 构建链
 const model = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0 });
 const structuredModel = model.withStructuredOutput(articleAnalysisSchema, {
-  strategy: "tool",
+  method: "functionCalling",
   includeRaw: false,
 });
 
@@ -375,7 +375,7 @@ const results = await analysisChain.batch(
 
 1. 链最后只要字符串？→ `StringOutputParser`
 2. 要 JSON、要流式渲染、字段松散？→ `JsonOutputParser`
-3. 要严格 schema 校验、强类型？→ `withStructuredOutput(schema, { strategy: "tool" })`
+3. 要严格 schema 校验、强类型？→ `withStructuredOutput(schema, { method: "functionCalling" })`
 4. Agent 整体输出按 schema？→ `createAgent` 的 `responseFormat: toolStrategy(schema)`
 5. 模型不支持工具调用？→ 退回手写 system prompt + `JsonOutputParser`
 

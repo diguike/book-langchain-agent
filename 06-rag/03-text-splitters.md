@@ -280,12 +280,12 @@ const chunks = await semanticChunk(longText, {
 
 ## 用真实数据跑一次对比
 
-参数选完别拍脑袋上线，跑一次小规模实测。下面这段脚本对比四组参数对 Recall@k 的影响：
+参数选完别拍脑袋上线，跑一次小规模实测。下面这段脚本对比四组参数对 Recall@k 的影响（`RecursiveCharacterTextSplitter` 在 `@langchain/textsplitters`，内存向量库 `MemoryVectorStore` 在 langchain 1.x 的"经典"包 `@langchain/classic`）：
 
 ```typescript
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 import type { Document } from "@langchain/core/documents";
 
 interface EvalSample {

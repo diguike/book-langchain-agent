@@ -218,7 +218,7 @@ chain.pipe((input: number) => input * 2);
 
 我在生产里靠这套类型系统抓出过无数次"忘记传字段"和"上一段输出和下一段输入对不上"的低级错误。
 
-## 8. 运行时配置：context 与 withConfig
+## 8. 运行时配置：configurable 与 withConfig
 
 LCEL 链调用时可以传 `RunnableConfig`：
 
@@ -228,17 +228,17 @@ const result = await chain.invoke(
   {
     tags: ["prod"],
     metadata: { userId: "u-123" },
-    context: { tier: "pro" },     // 运行时上下文
+    configurable: { tier: "pro" },     // 运行时参数
     runName: "TranslateChain",
   }
 );
 ```
 
-`context` 是承担"调用时传给链/Agent 的外部参数"这件事的标准字段。`RunnableLambda` 里能从 config 拿到：
+`configurable` 是承担"调用时传给链的外部参数"这件事的标准字段。`RunnableLambda` 里能从 config 拿到：
 
 ```typescript
 const lambda = RunnableLambda.from((input: string, config) => {
-  const tier = (config?.context as { tier?: string } | undefined)?.tier;
+  const tier = (config?.configurable as { tier?: string } | undefined)?.tier;
   return `[${tier ?? "free"}] ${input}`;
 });
 ```
@@ -285,7 +285,7 @@ const analysisSchema = z.object({
 const analysisChain = ChatPromptTemplate.fromMessages([
   ["system", "分析文本的主题和难度。"],
   ["human", "{text}"],
-]).pipe(model.withStructuredOutput(analysisSchema, { strategy: "tool" }));
+]).pipe(model.withStructuredOutput(analysisSchema, { method: "functionCalling" }));
 
 // 3. 并行：同时翻译两种语言 + 分析 + 透传原文
 // RunnableParallel.from(...)（等价于 new RunnableParallel({ steps: ... }) 构造）

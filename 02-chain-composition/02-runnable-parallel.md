@@ -167,7 +167,7 @@ const keywordsSchema = z.object({
 const keywordsChain = ChatPromptTemplate.fromTemplate(
   "从以下文本中提取 5 个最重要的关键词：\n\n{text}",
 )
-  .pipe(model.withStructuredOutput(keywordsSchema, { strategy: "tool" }))
+  .pipe(model.withStructuredOutput(keywordsSchema, { method: "functionCalling" }))
   .pipe((r) => r.keywords);
 
 // 分支 3：情感分析
@@ -179,7 +179,7 @@ const sentimentSchema = z.object({
 const sentimentChain = ChatPromptTemplate.fromTemplate(
   "分析以下文本的情感倾向：\n\n{text}",
 )
-  .pipe(model.withStructuredOutput(sentimentSchema, { strategy: "tool" }));
+  .pipe(model.withStructuredOutput(sentimentSchema, { method: "functionCalling" }));
 
 // 主链：用 assign 让三个分支并行执行，并把结果挂在原始输入旁边
 const analysisChain = RunnablePassthrough.assign({

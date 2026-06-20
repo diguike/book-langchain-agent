@@ -15,9 +15,9 @@ last_synced: "2026-05-25T02:40:19+08:00"
 
 `createAgent` 返回的 Agent 也是一个 graph，所以本节方法对它同样适用。
 
-## 五种 stream mode
+## stream mode 一览
 
-`stream()` 的 `streamMode` 选项决定推什么粒度的数据：
+`stream()` 的 `streamMode` 选项决定推什么粒度的数据。LangGraph 1.x 共 8 个值：
 
 | Mode | 推什么 | 用在哪里 |
 |------|--------|----------|
@@ -26,6 +26,9 @@ last_synced: "2026-05-25T02:40:19+08:00"
 | `messages` | 模型 token 级流（message + metadata） | 聊天 UI |
 | `debug` | 所有 internal 事件 + 节点输入输出 | 深度调试 |
 | `custom` | 用户自定义事件（用 `dispatchCustomEvent`） | 业务级埋点 |
+| `checkpoints` | 每次 checkpoint 写入后的快照 | 持久化进度监控、时间旅行调试 |
+| `tasks` | 任务级开始/结束日志（含 interrupt） | 节点任务粒度的追踪 |
+| `tools` | 工具调用专用流 | 单独监听工具执行 |
 
 可以传多个：`streamMode: ["updates", "messages"]`，事件流里每个 chunk 带 `(mode, data)` 元组。
 
@@ -57,7 +60,7 @@ for await (const snapshot of agent.stream(
 ```typescript
 for await (const update of agent.stream(input, { streamMode: "updates" })) {
   // update 是 { 节点名: 该节点输出的增量 } 的形式
-  // 例如 { model: { messages: [新 AI 消息] } }
+  // 例如 { model_request: { messages: [新 AI 消息] } }（createAgent 内部模型节点名）
   console.log(JSON.stringify(update, null, 2));
 }
 ```
@@ -71,8 +74,8 @@ for await (const [chunk, metadata] of agent.stream(input, {
   streamMode: "messages",
 })) {
   // chunk 是 AIMessageChunk
-  // metadata 含节点名、tags 等
-  if (metadata.langgraph_node === "model") {
+  // metadata 含节点名、tags 等（createAgent 内部模型节点名是 "model_request"）
+  if (metadata.langgraph_node === "model_request") {
     process.stdout.write(chunk.contentBlocks?.[0]?.text ?? "");
   }
 }
@@ -184,6 +187,8 @@ on_retriever_start / on_retriever_end
 on_prompt_start / on_prompt_end
 on_custom_event
 ```
+
+`createAgent` 返回的 Agent 还支持 `streamEvents(input, { version: "v3" })`，返回一个 `AgentRunStream`，提供 `run.messages` / `run.toolCalls` / `run.middleware` / `run.output` 等类型化投影，比 v2 手动 `switch` 事件名更省心。v3 目前标注为实验性，API 可能调整，未来会成为默认；想要稳定接口仍用 `version: "v2"`。
 
 ## `stream` vs `streamEvents` 怎么选
 

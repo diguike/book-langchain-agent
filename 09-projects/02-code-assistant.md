@@ -335,7 +335,7 @@ const model = new ChatAnthropic({
   model: "claude-opus-4-7",
   temperature: 0,
   // 开启 extended thinking，让模型先在草稿区想清楚再动手
-  thinkingBudget: 4_000,
+  thinking: { type: "enabled", budget_tokens: 4000 },
 });
 
 const SYSTEM_PROMPT = `你是一个代码助手，工作在用户的本地 workspace 目录下。

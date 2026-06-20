@@ -24,9 +24,10 @@ LangChain.js 1.x 的追踪集成是开箱即用的。新建一个 LangSmith 账�
 
 ```bash
 # .env
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY=lsv2_pt_xxxxxxxxxxxx
-LANGCHAIN_PROJECT=my-agent-prod   # 可选：项目名，缺省就是 default
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=lsv2_pt_xxxxxxxxxxxx
+LANGSMITH_PROJECT=my-agent-prod   # 可选：项目名，缺省就是 default
+# 旧的 LANGCHAIN_* 前缀（LANGCHAIN_TRACING_V2/LANGCHAIN_API_KEY/LANGCHAIN_PROJECT）仍然兼容
 ```
 
 代码里加载一下：
@@ -59,7 +60,7 @@ const result = await agent.invoke({
 ```typescript
 // src/observability.ts
 const env = process.env.NODE_ENV ?? "development";
-process.env.LANGCHAIN_PROJECT = `my-agent-${env}`;
+process.env.LANGSMITH_PROJECT = `my-agent-${env}`;
 ```
 
 要在多个项目之间切换，也可以在调用时按需指定：
@@ -278,14 +279,14 @@ import "dotenv/config";
 export function initObservability() {
   const env = process.env.NODE_ENV ?? "development";
 
-  if (!process.env.LANGCHAIN_API_KEY) {
-    console.warn("[obs] LANGCHAIN_API_KEY 未设置，追踪将不上报");
-    process.env.LANGCHAIN_TRACING_V2 = "false";
+  if (!process.env.LANGSMITH_API_KEY) {
+    console.warn("[obs] LANGSMITH_API_KEY 未设置，追踪将不上报");
+    process.env.LANGSMITH_TRACING = "false";
     return;
   }
 
-  process.env.LANGCHAIN_TRACING_V2 = "true";
-  process.env.LANGCHAIN_PROJECT = `my-agent-${env}`;
+  process.env.LANGSMITH_TRACING = "true";
+  process.env.LANGSMITH_PROJECT = `my-agent-${env}`;
   console.log(`[obs] LangSmith tracing enabled, project=my-agent-${env}`);
 }
 ```

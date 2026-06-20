@@ -196,8 +196,8 @@ ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
 
 # LangSmith（模块 7 开始使用）
 LANGSMITH_API_KEY=lsv2_pt_xxxxxxxxxxxxxxxxxxxxxxxx
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_PROJECT=langchain-agent-course
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT=langchain-agent-course
 ```
 
 ### 5.3 将 .env 加入 .gitignore
@@ -251,14 +251,16 @@ LangSmith 是 LangChain 官方的可观测性平台，我们将在模块 7 深�
 ```bash
 # 在 .env 中添加以下三行
 LANGSMITH_API_KEY=lsv2_pt_xxxxxxxxxxxxxxxxxxxxxxxx
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_PROJECT=langchain-agent-course
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT=langchain-agent-course
 ```
 
-- `LANGCHAIN_TRACING_V2=true`：启用自动追踪，所有 LangChain 调用都会被记录
-- `LANGCHAIN_PROJECT`：项目名称，用于在 LangSmith 面板中分组查看追踪数据
+- `LANGSMITH_TRACING=true`：启用自动追踪，所有 LangChain 调用都会被记录
+- `LANGSMITH_PROJECT`：项目名称，用于在 LangSmith 面板中分组查看追踪数据
 
-> **提示：** LangSmith 提供免费额度，足够课程学习使用。如果你暂时不想注册，可以将 `LANGCHAIN_TRACING_V2` 设为 `false`，不影响核心功能。
+> **兼容性：** 旧的 `LANGCHAIN_TRACING_V2` / `LANGCHAIN_API_KEY` / `LANGCHAIN_PROJECT` 前缀仍然有效，新项目统一用 `LANGSMITH_*` 即可。
+
+> **提示：** LangSmith 提供免费额度，足够课程学习使用。如果你暂时不想注册，可以将 `LANGSMITH_TRACING` 设为 `false`，不影响核心功能。
 
 ---
 

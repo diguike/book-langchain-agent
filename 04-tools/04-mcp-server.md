@@ -207,7 +207,7 @@ const agent = createAgent({
 });
 ```
 
-工具命名上 `@langchain/mcp-adapters` 会自动加 Server 前缀避免冲突——比如 `filesystem__read_file`、`github__create_issue`。
+工具命名上要注意：`@langchain/mcp-adapters` **默认不加** Server 前缀（`prefixToolNameWithServerName` 默认为 `false`），拿回来的工具名就是 Server 原始的 `read_file`、`create_issue`。如果两个 Server 注册了同名工具，默认会冲突。需要隔离时显式开启前缀：在客户端配置里设 `prefixToolNameWithServerName: true`，工具名才会变成 `filesystem__read_file`、`github__create_issue`。
 
 ## HTTP Transport：连接远程 MCP Server
 

@@ -4,7 +4,7 @@ feishu_url: "https://fivwvysqdz.feishu.cn/wiki/YMdZwb8QRixmVwkcYEBcEY7Jnkc"
 last_synced: "2026-05-25T02:43:45+08:00"
 ---
 
-> 这一章只收 LangChain.js 1.x 时代踩过的坑。环境是 Node.js 22+，`langchain@1.4.x`、`@langchain/core@1.4.x`、`@langchain/langgraph@1.x`。
+> 这一章只收 LangChain.js 1.x 时代踩过的坑。环境是 Node.js 22+，`langchain@1.5.x`、`@langchain/core@1.5.x`、`@langchain/langgraph@1.x`。
 
 ## 一、Agent 不调工具
 
@@ -136,14 +136,10 @@ middleware: [
 
 **解决**：
 
-- 优先用 `toolStrategy`，兼容性最好：
+- 优先用 `method: "functionCalling"`（走 tool calling，兼容性最好）：
 
 ```typescript
-import { toolStrategy } from "langchain";
-
-model.withStructuredOutput(schema, { strategy: "tool" });
-// 或：
-const structured = model.withStructuredOutput(toolStrategy(schema));
+model.withStructuredOutput(schema, { method: "functionCalling" });
 ```
 
 - schema 里每个字段都加 `.describe(...)`，模型才知道每个字段填什么

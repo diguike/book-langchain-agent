@@ -139,8 +139,8 @@ for await (const update of stream) {
   for (const [nodeName, payload] of Object.entries(update)) {
     const messages = (payload as { messages?: unknown[] }).messages ?? [];
     for (const msg of messages as Array<Record<string, unknown>>) {
-      // 模型节点：输出 thinking + tool_calls
-      if (nodeName === "model") {
+      // 模型节点：输出 thinking + tool_calls（createAgent 内部模型节点名是 "model_request"）
+      if (nodeName === "model_request") {
         const toolCalls = msg.tool_calls as Array<{ name: string; args: unknown }> | undefined;
         if (toolCalls?.length) {
           console.log(

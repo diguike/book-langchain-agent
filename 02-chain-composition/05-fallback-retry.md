@@ -43,11 +43,11 @@ const resilient = model.withRetry({
   // 最大尝试次数（含首次）
   stopAfterAttempt: 3,
 
-  // 每次失败的回调，用来打日志 / 告警
-  onFailedAttempt: (error, attemptNumber) => {
-    console.warn(`第 ${attemptNumber} 次失败：${error.message}`);
-    if (attemptNumber >= 2) {
-      alertOps(`模型连续失败 ${attemptNumber} 次`);
+  // 每次失败的回调，签名是 (error, input)；尝试次数挂在 error.attemptNumber 上
+  onFailedAttempt: (error, input) => {
+    console.warn(`第 ${error.attemptNumber} 次失败：${error.message}`);
+    if (error.attemptNumber >= 2) {
+      alertOps(`模型连续失败 ${error.attemptNumber} 次`);
     }
   },
 });
@@ -111,14 +111,7 @@ const multiLevel = primary.withFallbacks([
                                        ↘ 失败 → 抛最后一个异常
 ```
 
-注意：默认情况下 `.withFallbacks([...])` 对**所有异常**都触发降级。要限制只在特定异常时降级，传第二参数：
-
-```typescript
-const resilient = primary.withFallbacks([fallback], {
-  // 只在这些异常类型上降级，其他直接抛
-  exceptionsToHandle: ["RateLimitError", "APIConnectionError"],
-});
-```
+注意：`.withFallbacks([...])` 对**所有异常**都触发降级，它只接受 fallback 数组这一个参数，没有按错误类型过滤的选项。要按错误类型降级，需在主 Runnable 内部 catch 后选择性 rethrow——判断是想降级的错误类型就继续 throw（触发 fallback），否则自行处理或返回降级值。
 
 ### 不只是模型
 
@@ -156,12 +149,12 @@ import { ChatAnthropic } from "@langchain/anthropic";
 
 const primary = new ChatOpenAI({ model: "gpt-5" }).withRetry({
   stopAfterAttempt: 3,
-  onFailedAttempt: (e, n) => console.warn(`[primary] #${n}: ${e.message}`),
+  onFailedAttempt: (e) => console.warn(`[primary] #${e.attemptNumber}: ${e.message}`),
 });
 
 const secondary = new ChatAnthropic({ model: "claude-sonnet-4-6" }).withRetry({
   stopAfterAttempt: 2,
-  onFailedAttempt: (e, n) => console.warn(`[secondary] #${n}: ${e.message}`),
+  onFailedAttempt: (e) => console.warn(`[secondary] #${e.attemptNumber}: ${e.message}`),
 });
 
 const productionModel = primary.withFallbacks([secondary]);
@@ -279,7 +272,7 @@ const primaryChain = prompt
   .pipe(
     new ChatOpenAI({ model: "gpt-5" }).withRetry({
       stopAfterAttempt: 3,
-      onFailedAttempt: (e, n) => console.warn(`[gpt-5] #${n}: ${e.message}`),
+      onFailedAttempt: (e) => console.warn(`[gpt-5] #${e.attemptNumber}: ${e.message}`),
     }),
   )
   .pipe(parser);
@@ -289,7 +282,7 @@ const fallbackChain1 = prompt
   .pipe(
     new ChatOpenAI({ model: "gpt-4o" }).withRetry({
       stopAfterAttempt: 2,
-      onFailedAttempt: (e, n) => console.warn(`[gpt-4o] #${n}: ${e.message}`),
+      onFailedAttempt: (e) => console.warn(`[gpt-4o] #${e.attemptNumber}: ${e.message}`),
     }),
   )
   .pipe(parser);
@@ -299,7 +292,7 @@ const fallbackChain2 = prompt
   .pipe(
     new ChatAnthropic({ model: "claude-sonnet-4-6" }).withRetry({
       stopAfterAttempt: 2,
-      onFailedAttempt: (e, n) => console.warn(`[claude] #${n}: ${e.message}`),
+      onFailedAttempt: (e) => console.warn(`[claude] #${e.attemptNumber}: ${e.message}`),
     }),
   )
   .pipe(parser);

@@ -65,17 +65,19 @@ graph LR
 
 ```bash
 npm install langchain @langchain/openai @langchain/textsplitters \
-  @langchain/community @langchain/core
+  @langchain/classic @langchain/community @langchain/core
 ```
 
-`@langchain/community` 里有最常用的内存向量库 `MemoryVectorStore`，足够本地验证。生产用 Chroma 或 Qdrant，后面会换。
+先说清 langchain 1.x 的包分层，后面所有 import 路径都依赖它：核心抽象在 `@langchain/core`，主包 `langchain`（含 `createAgent` 等），早期版本沉淀下来的 retriever / 内存向量库等"经典"实现挪到了 `@langchain/classic`，第三方集成在 `@langchain/community`，规模较大的 provider 各自独立成包（如 `@langchain/qdrant`、`@langchain/pgvector`）。
+
+最常用的内存向量库 `MemoryVectorStore` 现在归在 `@langchain/classic`，足够本地验证。生产用 Chroma 或 Qdrant，后面会换。
 
 最小可运行示例：
 
 ```typescript
 // rag-min.ts
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 import { Document } from "@langchain/core/documents";
 
 // 1. 假装这是从 loader 加载来的文档
@@ -176,7 +178,7 @@ const vectorStore = await Chroma.fromDocuments(
 const found = await vectorStore.similaritySearch(question, 4);
 ```
 
-换成 Qdrant 也类似，import 改成 `@langchain/community/vectorstores/qdrant`、传 `url: "http://localhost:6333"` 即可。
+换成 Qdrant 也类似，import 改成 `@langchain/qdrant`（Qdrant 已独立成包）、传 `url: "http://localhost:6333"` 即可。
 
 ### 3. 把检索 → 生成做成可复用的函数
 

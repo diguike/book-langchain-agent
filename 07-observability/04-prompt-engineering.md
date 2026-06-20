@@ -200,12 +200,12 @@ console.log(out.steps);
 console.log(out.finalAnswer); // "230 km"
 ```
 
-**Claude 系列还有原生的 thinking mode**——在 `ChatAnthropic` 上传 `thinkingBudget` 让模型用内部 thinking blocks 推理，输出不会包含思考过程但精度提升明显（适合不想暴露思考过程给用户的场景）：
+**Claude 系列还有原生的 thinking mode**——在 `ChatAnthropic` 上传 `thinking` 配置让模型用内部 thinking blocks 推理，输出不会包含思考过程但精度提升明显（适合不想暴露思考过程给用户的场景）：
 
 ```typescript
 const model = new ChatAnthropic({
   model: "claude-opus-4-7",
-  thinkingBudget: 10000, // tokens
+  thinking: { type: "enabled", budget_tokens: 10000 },
 });
 ```
 
@@ -284,7 +284,7 @@ const newPrompt = ChatPromptTemplate.fromMessages([
 ]);
 
 await hub.push("my-org/customer-service", newPrompt, {
-  newRepoIsPublic: false, // 私有仓库
+  isPublic: false, // 私有仓库
 });
 
 // 从 Hub 拉

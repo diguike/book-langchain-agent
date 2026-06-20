@@ -111,13 +111,15 @@ OpenAI 原生返回的 `arguments` 是 JSON 字符串，Anthropic 是 `input` �
 > **仅用于调试观察单步决策**。生产代码请用 `createAgent({ model, tools })`，不要直接调 `model.invoke`。
 
 ```typescript
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage } from "@langchain/core/messages";
 
 // 注意：这是为了"看一步"才直接用模型。生产代码用 createAgent 跑完整循环
-const model = new ChatAnthropic({ model: "claude-haiku-4-5" });
+// invoke 选项里传 tools 是 OpenAI 实现的 CallOption，不是跨厂商通用路径；
+// 通用做法是 model.bindTools([...]) 再 invoke，或直接用 createAgent
+const model = new ChatOpenAI({ model: "gpt-5" });
 const response = await model.invoke([new HumanMessage("北京天气？")], {
-  tools,  // 1.x 把 tools 通过 invoke 选项传入，而非 .bindTools()
+  tools,
 });
 
 if (response.tool_calls && response.tool_calls.length > 0) {
@@ -136,8 +138,8 @@ if (response.tool_calls && response.tool_calls.length > 0) {
 // 1. auto（默认）：模型自行决定是否调工具
 await model.invoke(messages, { tools, tool_choice: "auto" });
 
-// 2. required（OpenAI）/ any（Anthropic）：必须调至少一个工具
-await model.invoke(messages, { tools, tool_choice: "required" });
+// 2. any：必须调至少一个工具（LangChain 统一值，对应 OpenAI 原生的 "required"）
+await model.invoke(messages, { tools, tool_choice: "any" });
 
 // 3. 指定具体工具：强制调用某个工具，不会调其他
 await model.invoke(messages, {
@@ -154,7 +156,7 @@ await model.invoke(messages, { tools, tool_choice: "none" });
 | 策略 | 行为 | 何时用 |
 |------|------|--------|
 | `"auto"` | 模型自行判断 | 大多数对话型 Agent |
-| `"required"` | 必须调一个工具 | 工具导向的固定流程 |
+| `"any"` | 必须调一个工具 | 工具导向的固定流程 |
 | `{ type: "tool", name }` | 必须调指定工具 | 结构化信息提取、强制走特定路径 |
 | `"none"` | 禁用工具 | 临时让模型"安静"地回答 |
 
@@ -180,14 +182,13 @@ await model.invoke(messages, { tools, tool_choice: "none" });
 如果你想禁用并行（某些场景要求工具必须串行，比如有依赖关系）：
 
 ```typescript
-// OpenAI 通过 modelKwargs 关掉并行
-const model = new ChatOpenAI({
-  model: "gpt-5",
-  modelKwargs: { parallel_tool_calls: false },
-});
+// OpenAI 在 invoke 时传 parallel_tool_calls 关掉并行
+// （这是 ChatOpenAI 的 CallOptions 字段，不放构造器的 modelKwargs 里）
+const model = new ChatOpenAI({ model: "gpt-5" });
+await model.invoke(messages, { tools, parallel_tool_calls: false });
 
 // Anthropic 通过 disable_parallel_tool_use 关掉
-const model = new ChatAnthropic({
+const anthropicModel = new ChatAnthropic({
   model: "claude-sonnet-4-6",
   invocationKwargs: { disable_parallel_tool_use: true },
 });
@@ -201,7 +202,7 @@ const model = new ChatAnthropic({
 |------|:---:|:---:|:---:|:---:|
 | 基础 Function Calling | 是 | 是 | 是 | 部分模型 |
 | 并行工具调用 | 是 | 是 | 是 | 否 |
-| `tool_choice: auto/required` | 是 | 是 | 是 | 有限 |
+| `tool_choice: auto/any` | 是 | 是 | 是 | 有限 |
 | 强制指定工具 | 是 | 是 | 是 | 否 |
 | 嵌套对象 schema | 是 | 是 | 是 | 不稳定 |
 | 复杂 enum / union | 是 | 是 | 是 | 不稳定 |
@@ -338,7 +339,7 @@ LangChain.js 1.x 的统一 Function Calling 模式，核心就一句话：**写�
 |------|----------|
 | 工具定义 | `tool(fn, { name, description, schema })` |
 | 绑定到模型 | 不要 `.bindTools()`，直接 `createAgent({ model, tools })` |
-| 选择工具策略 | `tool_choice: "auto" / "required" / { type: "tool", name } / "none"` |
+| 选择工具策略 | `tool_choice: "auto" / "any" / { type: "tool", name } / "none"` |
 | 并行调用 | 默认开启，`createAgent` 内部 `Promise.all` |
 | 跨厂商切换 | 换一个 model 实例，其他不动 |
 

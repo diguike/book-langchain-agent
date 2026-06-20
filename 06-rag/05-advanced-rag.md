@@ -17,6 +17,8 @@ last_synced: "2026-05-25T02:42:45+08:00"
 
 这几类问题对应四种治法：**HyDE / Parent-Document / Rerank / Query decomposition**。本节按"效果 vs 成本"排序，从最划算的 Rerank 讲起。
 
+import 路径沿用上一节的包分层：`ContextualCompressionRetriever`、`ParentDocumentRetriever`、`MultiQueryRetriever`、`EnsembleRetriever` 这些经典 retriever 都在 `@langchain/classic`；`BM25Retriever` 在 `@langchain/community`；Cohere rerank 在独立的 `@langchain/cohere`。
+
 ## Rerank：性价比最高的精度提升
 
 ### 为什么需要 Rerank
@@ -39,7 +41,7 @@ npm install @langchain/cohere
 
 ```typescript
 import { CohereRerank } from "@langchain/cohere";
-import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
+import { ContextualCompressionRetriever } from "@langchain/classic/retrievers/contextual_compression";
 
 const reranker = new CohereRerank({
   apiKey: process.env.COHERE_API_KEY!,
@@ -262,7 +264,7 @@ const docs = await hydeRetrieve("咋退货？", {
 ### 实现
 
 ```typescript
-import { ParentDocumentRetriever } from "langchain/retrievers/parent_document";
+import { ParentDocumentRetriever } from "@langchain/classic/retrievers/parent_document";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { InMemoryStore } from "@langchain/core/stores";
@@ -316,7 +318,7 @@ const docs = await retriever.invoke("VIP 用户退货时限是多久？");
 一个用户问题往往可以从多角度表述。让 LLM 改写成多个版本，分别检索，结果合并：
 
 ```typescript
-import { MultiQueryRetriever } from "langchain/retrievers/multi_query";
+import { MultiQueryRetriever } from "@langchain/classic/retrievers/multi_query";
 import { ChatOpenAI } from "@langchain/openai";
 
 const expander = MultiQueryRetriever.fromLLM({
@@ -360,7 +362,7 @@ async function decomposeAndRetrieve(
 ): Promise<Document[]> {
   // 1. 拆问题
   const structured = llm.withStructuredOutput(decomposeSchema, {
-    strategy: "tool",
+    method: "functionCalling",
   });
   const { subQuestions } = await structured.invoke(
     `把下面这个问题拆成 1-4 个可以独立检索的子问题。每个子问题必须能被向量检索单独回答。
@@ -418,8 +420,8 @@ Decomposition 跟 Multi-Query 的区别：Multi-Query 是同一个问题的同�
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { BM25Retriever } from "@langchain/community/retrievers/bm25";
-import { EnsembleRetriever } from "langchain/retrievers/ensemble";
-import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
+import { EnsembleRetriever } from "@langchain/classic/retrievers/ensemble";
+import { ContextualCompressionRetriever } from "@langchain/classic/retrievers/contextual_compression";
 import { CohereRerank } from "@langchain/cohere";
 import { Document } from "@langchain/core/documents";
 

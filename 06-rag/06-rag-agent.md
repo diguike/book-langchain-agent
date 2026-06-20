@@ -155,7 +155,7 @@ import { TavilySearch } from "@langchain/tavily";
 
 const webSearch = new TavilySearch({
   maxResults: 5,
-  apiKey: process.env.TAVILY_API_KEY!,
+  tavilyApiKey: process.env.TAVILY_API_KEY!,
 });
 
 const agent = createAgent({
@@ -229,7 +229,7 @@ async function retrieve(state: State): Promise<Partial<State>> {
 // 4. 节点：评估相关性
 async function gradeDocuments(state: State): Promise<Partial<State>> {
   const graded: Document[] = [];
-  const structured = judge.withStructuredOutput(gradeSchema, { strategy: "tool" });
+  const structured = judge.withStructuredOutput(gradeSchema, { method: "functionCalling" });
 
   for (const doc of state.documents) {
     const r = await structured.invoke(
@@ -361,7 +361,7 @@ const routeSchema = z.object({
 });
 
 async function classify(state: AState): Promise<Partial<AState>> {
-  const structured = judge.withStructuredOutput(routeSchema, { strategy: "tool" });
+  const structured = judge.withStructuredOutput(routeSchema, { method: "functionCalling" });
   const { route } = await structured.invoke(
     `给下面的用户问题分类：
 
@@ -382,9 +382,9 @@ async function kbRetrieve(state: AState): Promise<Partial<AState>> {
 }
 
 async function webRetrieve(state: AState): Promise<Partial<AState>> {
-  // 调 Tavily 或类似工具
-  const results = await webSearch.invoke({ query: state.question });
-  const docs = results.results.map(
+  // 直接 invoke 返回 TavilySearchResponse，命中结果在 response.results 数组里
+  const response = await webSearch.invoke({ query: state.question });
+  const docs = response.results.map(
     (r: { content: string; url: string; title: string }) =>
       new Document({
         pageContent: r.content,

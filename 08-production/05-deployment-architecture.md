@@ -100,9 +100,10 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - LANGCHAIN_TRACING_V2=true
-      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
-      - LANGCHAIN_PROJECT=agent-prod
+      # LangSmith 追踪用 LANGSMITH_* 前缀（旧的 LANGCHAIN_* 前缀仍兼容）
+      - LANGSMITH_TRACING=true
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=agent-prod
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/agent
       - API_KEYS=${API_KEYS}
@@ -307,7 +308,7 @@ import { ChatAnthropic } from "@langchain/anthropic";
 
 type Env = {
   ANTHROPIC_API_KEY: string;
-  LANGCHAIN_API_KEY: string;
+  LANGSMITH_API_KEY: string;
 };
 
 const app = new Hono<{ Bindings: Env }>();
@@ -350,7 +351,7 @@ compatibility_date = "2026-05-25"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-LANGCHAIN_PROJECT = "agent-prod"
+LANGSMITH_PROJECT = "agent-prod"
 
 # 状态：用 Cloudflare D1 / KV / Durable Objects
 [[kv_namespaces]]

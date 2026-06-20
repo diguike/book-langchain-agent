@@ -362,7 +362,7 @@ import {
   END,
   START,
 } from "@langchain/langgraph";
-import { MemorySaver } from "@langchain/langgraph/checkpointers";
+import { MemorySaver } from "@langchain/langgraph";
 import { route } from "./agents/supervisor.js";
 import { orderAgent } from "./agents/order.js";
 import { refundAgent } from "./agents/refund.js";
@@ -613,7 +613,7 @@ const structuredJudge = judge.withStructuredOutput(
     score: z.number().min(0).max(1).describe("0-1 之间的总分"),
     reason: z.string().describe("一句话理由"),
   }),
-  { name: "rate_reply", strategy: "tool" }
+  { name: "rate_reply", method: "functionCalling" }
 );
 
 async function helpfulnessEvaluatorV2({
@@ -689,7 +689,7 @@ npm run dev
 
 1. **意图分类只有一轮**：用户中途切换话题（"先查订单，再退一下另一个"），Supervisor 不会回头重新分类，会继续走第一次选中的 Agent。
 2. **审批通知**：示例里只在 SSE 上推 `approval_required` 事件，没接入企业内部的飞书/钉钉通知系统。审批员感知有两条路：(a) 轮询一个 `/approvals/pending` 列表接口；(b) 订阅 SSE / WebSocket 事件流，新请求即时弹通知。另外要给挂起的 thread 设 TTL——纯 `MemorySaver` 是永久挂起，生产里要么用 PostgresSaver + 定时任务把超时的 thread 标记 `expired` 并回填一条"审批超时，自动拒绝"消息，要么在前端层定一个"未响应 N 分钟自动 release"的策略，避免内存/数据库被半成品对话撑爆。
-3. **FAQ 检索是字符串匹配**：真实场景要换成 PGVector + Embedding 检索，参考[向量存储](../06-rag/vector-stores.md)。
+3. **FAQ 检索是字符串匹配**：真实场景要换成 PGVector + Embedding 检索，参考 [RAG 基础管线](../06-rag/01-rag-pipeline.md) 与 [Retriever 策略](../06-rag/04-retrievers.md)。
 4. **没接限流**：高并发场景要在 Supervisor 节点前加 `humanInTheLoopMiddleware` 之外的速率限制 middleware。
 5. **多轮上下文压缩没做**：长对话下 token 会涨。生产环境加 `summarizationMiddleware`。
 6. **评估数据集太小**：只有 4 条，仅做演示。真实项目应至少 50-200 条覆盖各类边界。

@@ -10,10 +10,12 @@ last_synced: "2026-05-25T02:40:15+08:00"
 
 Middleware 是 LangChain.js 1.x 的核心新概念。一句话定义：**Middleware 是在 Agent 的 model 调用和 tool 调用周围注入逻辑的统一接口**。
 
-更具体的，Middleware 接口暴露四个钩子点：
+更具体的，Middleware 接口暴露六个钩子点：
 
 ```
 ┌─────────────────────────────────────┐
+│         beforeAgent(state)          │  整次 invoke 只跑一次（启动前）
+├─────────────────────────────────────┤
 │         beforeModel(state)          │  在调用模型之前
 ├─────────────────────────────────────┤
 │         model 节点                   │
@@ -22,13 +24,17 @@ Middleware 是 LangChain.js 1.x 的核心新概念。一句话定义：**Middlew
 ├─────────────────────────────────────┤
 │  （如果有 tool_calls，进入 tool 循环）  │
 ├─────────────────────────────────────┤
-│         wrapModelCall(handler)      │  完全包裹模型调用
+│   wrapModelCall(request, handler)   │  完全包裹模型调用
 ├─────────────────────────────────────┤
-│         wrapToolCall(handler)       │  完全包裹工具调用
+│   wrapToolCall(request, handler)    │  完全包裹工具调用
+├─────────────────────────────────────┤
+│         afterAgent(state)           │  整次 invoke 只跑一次（循环结束后）
 └─────────────────────────────────────┘
 ```
 
 `beforeModel` 和 `afterModel` 是观察 + 轻量修改（改 state）。`wrapModelCall` 和 `wrapToolCall` 是完全接管：你可以重试、缓存、改返回值、决定不调下游。
+
+`beforeAgent` 和 `afterAgent` 与前四个的本质区别在于触发频率：`beforeModel` / `afterModel` 每次模型调用都跑一次（一次 invoke 里 ReAct 循环多轮就跑多轮），而 `beforeAgent` / `afterAgent` 整次 invoke 只跑一次——`beforeAgent` 在 Agent 启动前、任何模型/工具调用之前，`afterAgent` 在整个循环结束后。会话级初始化、整体限流、循环结束后的统一清理放这两个钩子，避免每轮重复执行。
 
 ## 为什么需要 middleware
 
@@ -54,7 +60,7 @@ const auditMiddleware = createMiddleware({
   name: "audit",
   // 在模型调用前打点
   async beforeModel(state, runtime) {
-    const lastUserMsg = state.messages.findLast((m) => m._getType() === "human");
+    const lastUserMsg = state.messages.findLast((m) => m.getType() === "human");
     console.log(`[audit] user request: ${lastUserMsg?.content}`);
     console.log(`[audit] thread_id: ${runtime.config.configurable?.thread_id}`);
   },
@@ -100,7 +106,7 @@ const cache = new Map<string, any>();
 
 const cacheMiddleware = createMiddleware({
   name: "cache",
-  async wrapModelCall(handler, request) {
+  async wrapModelCall(request, handler) {
     // request 包含将要发给模型的所有信息
     const key = crypto
       .createHash("sha256")
@@ -181,7 +187,7 @@ const agent = createAgent({
 ```typescript
 const retryToolMiddleware = createMiddleware({
   name: "retry-tool",
-  async wrapToolCall(handler, request) {
+  async wrapToolCall(request, handler) {
     const maxAttempts = 3;
     let lastError: unknown;
 
@@ -191,7 +197,7 @@ const retryToolMiddleware = createMiddleware({
       } catch (err) {
         lastError = err;
         const delay = 2 ** attempt * 100;
-        console.log(`[retry-tool] ${request.tool} attempt ${attempt} failed, retry in ${delay}ms`);
+        console.log(`[retry-tool] ${request.tool?.name} attempt ${attempt} failed, retry in ${delay}ms`);
         await new Promise((r) => setTimeout(r, delay));
       }
     }
@@ -199,8 +205,8 @@ const retryToolMiddleware = createMiddleware({
     // 重试用尽，把异常转成一条结构化消息回灌
     return {
       role: "tool",
-      tool_call_id: request.tool_call_id,
-      content: `Tool ${request.tool} failed after ${maxAttempts} attempts: ${String(lastError)}`,
+      tool_call_id: request.toolCall.id,
+      content: `Tool ${request.tool?.name} failed after ${maxAttempts} attempts: ${String(lastError)}`,
     };
   },
 });
@@ -323,7 +329,7 @@ Middleware 是强大的"切面"工具，但有两种情况不该用：
 
 ## 小结
 
-Middleware 是 1.x Agent 系统的 cross-cutting 接口，提供四个钩子：`beforeModel` / `afterModel` / `wrapModelCall` / `wrapToolCall`。内置了 `dynamicSystemPromptMiddleware` 和 `todoListMiddleware` 等开箱即用的实现。生产环境用 middleware 处理审计、限流、缓存、动态提示等横切关注点。
+Middleware 是 1.x Agent 系统的 cross-cutting 接口，提供六个钩子：整次 invoke 只跑一次的 `beforeAgent` / `afterAgent`，每次模型调用都跑的 `beforeModel` / `afterModel`，以及完全包裹调用的 `wrapModelCall` / `wrapToolCall`。内置了 `dynamicSystemPromptMiddleware` 和 `todoListMiddleware` 等开箱即用的实现。生产环境用 middleware 处理审计、限流、缓存、动态提示等横切关注点。
 
 下一节 [Multi-Agent 协作](./08-multi-agent.md) 把多个 Agent 串起来构成更大的系统。
 

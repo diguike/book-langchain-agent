@@ -26,7 +26,7 @@ last_synced: "2026-05-25T02:41:33+08:00"
 
 ## `BaseCheckpointSaver` 接口
 
-LangGraph 把"按 thread_id 持久化状态"抽象成了 `BaseCheckpointSaver`，源码在 `@langchain/langgraph-checkpoint`。要自定义 checkpointer，实现四个方法：
+LangGraph 把"按 thread_id 持久化状态"抽象成了 `BaseCheckpointSaver`，源码在 `@langchain/langgraph-checkpoint`。要自定义 checkpointer，实现五个抽象方法（`getTuple` / `list` / `put` / `putWrites` / `deleteThread`）：
 
 ```typescript
 import { BaseCheckpointSaver } from "@langchain/langgraph-checkpoint";
@@ -62,6 +62,9 @@ abstract class BaseCheckpointSaver {
     writes: PendingWrite[],
     taskId: string
   ): Promise<void>;
+
+  // 删除某个 thread 的全部 checkpoint 与 writes（删号 / 清理会话）
+  abstract deleteThread(threadId: string): Promise<void>;
 }
 ```
 
@@ -191,7 +194,8 @@ export class RedisCheckpointer extends BaseCheckpointSaver {
     const ns = (config.configurable?.checkpoint_ns ?? "") as string;
     const cid = checkpoint.id;
 
-    const [, payload] = this.serde.dumpsTyped({ checkpoint, metadata });
+    // dumpsTyped 是异步的，返回 Promise<[string, Uint8Array]>，必须 await
+    const [, payload] = await this.serde.dumpsTyped({ checkpoint, metadata });
 
     const pipeline = this.client.pipeline();
     pipeline.set(this.keyCp(tid, ns, cid), payload);
@@ -220,14 +224,28 @@ export class RedisCheckpointer extends BaseCheckpointSaver {
     const cid = config.configurable?.checkpoint_id as string;
 
     const pipeline = this.client.pipeline();
-    writes.forEach(([channel, value], idx) => {
-      const [, payload] = this.serde.dumpsTyped([channel, value]);
+    // dumpsTyped 是异步的（返回 Promise<[string, Uint8Array]>），用 for...of 才能 await
+    let idx = 0;
+    for (const [channel, value] of writes) {
+      const [, payload] = await this.serde.dumpsTyped([channel, value]);
       pipeline.hset(this.keyWrites(tid, ns, cid), `${taskId}:${idx}`, payload);
-    });
+      idx += 1;
+    }
     if (this.ttlSeconds) {
       pipeline.expire(this.keyWrites(tid, ns, cid), this.ttlSeconds);
     }
     await pipeline.exec();
+  }
+
+  // 删除某个 thread 的全部 checkpoint 与 pending writes（GDPR 删号、清理过期会话用）
+  async deleteThread(threadId: string): Promise<void> {
+    const pattern = `${this.prefix}thread:${threadId}:*`;
+    const stream = this.client.scanStream({ match: pattern, count: 100 });
+    for await (const keys of stream) {
+      if ((keys as string[]).length > 0) {
+        await this.client.del(...(keys as string[]));
+      }
+    }
   }
 }
 ```
