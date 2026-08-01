@@ -58,7 +58,7 @@
 
 ## 关于作者
 
-[递归客](https://inferloop.dev) — 前端全栈工程师，正在转型 AI Agent 工程师，inferloop.dev 站点维护者，技术书籍作者。
+[递归客](https://inferloop.dev) — Agent 工程师，全栈工程师出身，做 Agent 自进化、长程 Agent、AI 资产建设与团队 AI 体系搭建。inferloop.dev 站点维护者，技术书籍作者。
 
 ## 反馈
 
