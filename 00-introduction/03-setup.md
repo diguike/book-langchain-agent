@@ -246,7 +246,7 @@ echo ".env" >> .gitignore
 4. 点击 **Create Key**
 5. 复制生成的 Key（以 `sk-ant-` 开头），粘贴到 `.env` 文件中
 
-> **提示：** 课程中大部分示例同时提供 OpenAI 和 Anthropic 两套代码。你只需要准备其中一个 Provider 的 Key 即可开始学习，后续按需添加。
+> **提示：** 课程中大部分示例同时提供 OpenAI 和 Anthropic 两套代码。你只需要准备其中一个 Provider 的 Key 即可开始学习，后续按需添加。国内访问不便的话，可以用[阿里云百炼](https://www.aliyun.com/benefit/ai/aistar?userCode=okjhlpr5)的 OpenAI 兼容端点，把 `@langchain/openai` 的 `configuration.baseURL` 指过去即可。
 
 ---
 
